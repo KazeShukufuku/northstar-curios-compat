@@ -39,13 +39,19 @@ minecraft {
 repositories {
     mavenCentral()
     maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    maven {
+        url = 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf(files("${rootDir}/../mods/Northstar-0.5.4+1.20.1.jar"))
-    compileOnly fg.deobf(files("${rootDir}/../mods/curios-forge-5.14.1+1.20.1.jar"))
+    compileOnly fg.deobf("curse.maven:northstar-redux-${northstar_redux_cf}")
+    compileOnly fg.deobf("curse.maven:curios-${curios_cf}")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
