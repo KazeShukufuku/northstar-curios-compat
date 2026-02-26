@@ -1,5 +1,9 @@
 This project is an independent compatibility addon.
 
+Development transparency:
+- All code and documentation in this project were produced with AI-assisted tooling.
+- Final review, curation, and release responsibility remain with the project maintainer.
+
 It references APIs and runtime behavior from:
 - Northstar
 - Curios API

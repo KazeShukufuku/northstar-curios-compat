@@ -6,6 +6,12 @@ A small Forge compatibility mod for Minecraft 1.20.1 that allows Northstar oxyge
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
+## AI assistance disclosure
+
+This project's source code and documentation were created with AI-assisted tooling during development.
+All outputs were reviewed, edited, and validated by the project maintainer before release.
+The project maintainer is responsible for the final published code, behavior, and licensing decisions.
+
 ## Third-party licenses
 
 This addon integrates with third-party mods at runtime but does not include their binaries:
