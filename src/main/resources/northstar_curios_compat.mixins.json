@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.createdelight.compat.northstarcurios.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "northstar_curios_compat.refmap.json",
+  "mixins": [
+    "NorthstarOxygenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

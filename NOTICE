@@ -1,0 +1,14 @@
+This project is an independent compatibility addon.
+
+It references APIs and runtime behavior from:
+- Northstar
+- Curios API
+- Minecraft Forge
+- Sponge Mixin
+
+Relevant upstream licenses:
+- Northstar Redux: MIT License
+- Curios API: GNU Lesser General Public License v3.0 or later (LGPL-3.0-or-later)
+
+No third-party mod binaries are distributed in this repository.
+Please obtain dependencies from their official sources and comply with each project's license.

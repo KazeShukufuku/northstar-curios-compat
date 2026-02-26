@@ -1,0 +1,40 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="northstar_curios_compat"
+version="${file.jarVersion}"
+displayName="Northstar Curios Compat"
+authors="Create Delight Team"
+description='''
+Adds Curios oxygen source support to Northstar by reading oxygen tank tags from Curios slots.
+'''
+
+[[dependencies.northstar_curios_compat]]
+modId="forge"
+mandatory=true
+versionRange="[47.4,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.northstar_curios_compat]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.northstar_curios_compat]]
+modId="northstar"
+mandatory=true
+versionRange="[0.5.4,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.northstar_curios_compat]]
+modId="curios"
+mandatory=true
+versionRange="[5.14,)"
+ordering="AFTER"
+side="BOTH"
