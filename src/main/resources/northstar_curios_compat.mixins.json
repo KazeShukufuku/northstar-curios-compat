@@ -7,6 +7,9 @@
   "mixins": [
     "NorthstarOxygenMixin"
   ],
+  "client": [
+    "RemainingOxygenOverlayMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

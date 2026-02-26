@@ -71,6 +71,74 @@ public class NorthstarOxygenMixin {
         return ItemStack.EMPTY;
     }
 
+    private static ItemStack getUsableCuriosOxygenTank(LivingEntity entity) {
+        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
+
+        if (inventoryOptional.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+
+        ICuriosItemHandler inventory = inventoryOptional.get();
+
+        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(OXYGEN_SOURCE_TAG))) {
+            ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
+
+            if (!liveStack.isEmpty() && liveStack.is(OXYGEN_SOURCE_TAG)
+                    && canProvideOxygenWithoutConsuming(liveStack)) {
+                return liveStack;
+            }
+        }
+
+        return ItemStack.EMPTY;
+    }
+
+    private static boolean canProvideOxygenWithoutConsuming(ItemStack stack) {
+        ItemStack probeStack = stack.copy();
+        return NorthstarOxygen.depleteOxygen(probeStack, false);
+    }
+
+    private static boolean hasUsableCuriosOxygenTank(LivingEntity entity) {
+        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
+
+        if (inventoryOptional.isEmpty()) {
+            return false;
+        }
+
+        ICuriosItemHandler inventory = inventoryOptional.get();
+
+        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(OXYGEN_SOURCE_TAG))) {
+            ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
+
+            if (!liveStack.isEmpty() && liveStack.is(OXYGEN_SOURCE_TAG)
+                    && canProvideOxygenWithoutConsuming(liveStack)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean consumeFromAnyCuriosTank(LivingEntity entity, boolean shouldConsume) {
+        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
+
+        if (inventoryOptional.isEmpty()) {
+            return false;
+        }
+
+        ICuriosItemHandler inventory = inventoryOptional.get();
+
+        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(OXYGEN_SOURCE_TAG))) {
+            ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
+
+            if (!liveStack.isEmpty() && liveStack.is(OXYGEN_SOURCE_TAG)
+                    && NorthstarOxygen.depleteOxygen(liveStack, shouldConsume)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Inject(method = "onBreathe", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$onBreathe(LivingBreatheEvent event, CallbackInfo ci) {
         LivingEntity entity = event.getEntity();
@@ -80,6 +148,11 @@ public class NorthstarOxygenMixin {
         }
 
         Level level = entity.level();
+
+        if (level.isClientSide()) {
+            return;
+        }
+
         NorthstarOxygen oxygen = NorthstarOxygen.getDimension(level);
 
         if (oxygen.hasOxygen() && event.canBreathe()) {
@@ -90,15 +163,13 @@ public class NorthstarOxygenMixin {
             return;
         }
 
-        ItemStack tank = getCuriosOxygenTank(entity);
+        boolean shouldConsume = level.getGameTime() % 20L == 19L;
 
-        if (tank.isEmpty()) {
-            return;
-        }
+        boolean canBreatheFromCurios = shouldConsume
+            ? consumeFromAnyCuriosTank(entity, true)
+            : hasUsableCuriosOxygenTank(entity);
 
-        boolean shouldConsume = level.getGameTime() % 20L == 0L;
-
-        if (NorthstarOxygen.depleteOxygen(tank, shouldConsume)) {
+        if (canBreatheFromCurios) {
             event.setCanBreathe(true);
             event.setCanRefillAir(true);
             ci.cancel();
@@ -107,7 +178,7 @@ public class NorthstarOxygenMixin {
 
     @Inject(method = "getOxygenTank", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$preferCuriosTank(LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
-        ItemStack tank = getCuriosOxygenTank(entity);
+        ItemStack tank = getUsableCuriosOxygenTank(entity);
 
         if (!tank.isEmpty()) {
             cir.setReturnValue(tank);
