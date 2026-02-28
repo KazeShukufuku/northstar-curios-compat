@@ -139,6 +139,16 @@ public class NorthstarOxygenMixin {
         return false;
     }
 
+    private static boolean hasUsableAnyOxygenTank(LivingEntity entity) {
+        ItemStack tank = NorthstarOxygen.getOxygenTank(entity);
+
+        if (tank.isEmpty()) {
+            return false;
+        }
+
+        return NorthstarOxygen.depleteOxygen(tank.copy(), false);
+    }
+
     @Inject(method = "onBreathe", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$onBreathe(LivingBreatheEvent event, CallbackInfo ci) {
         LivingEntity entity = event.getEntity();
@@ -148,11 +158,6 @@ public class NorthstarOxygenMixin {
         }
 
         Level level = entity.level();
-
-        if (level.isClientSide()) {
-            return;
-        }
-
         NorthstarOxygen oxygen = NorthstarOxygen.getDimension(level);
 
         if (oxygen.hasOxygen() && event.canBreathe()) {
@@ -160,6 +165,15 @@ public class NorthstarOxygenMixin {
         }
 
         if (oxygen.getSealer(entity.position()) != null) {
+            return;
+        }
+
+        if (level.isClientSide()) {
+            if (hasUsableAnyOxygenTank(entity)) {
+                event.setCanBreathe(true);
+                event.setCanRefillAir(true);
+                ci.cancel();
+            }
             return;
         }
 
