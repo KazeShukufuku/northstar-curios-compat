@@ -1,6 +1,8 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
 import com.lightning.northstar.world.oxygen.NorthstarOxygen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -24,10 +26,22 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 @Mixin(value = NorthstarOxygen.class, remap = false)
 public class NorthstarOxygenMixin {
 
+    private static final int DEFAULT_OXYGEN_CAPACITY = 1800;
+    private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
+
     private static final TagKey<Item> OXYGEN_SOURCE_TAG = TagKey.create(
             Registries.ITEM,
             new ResourceLocation("northstar", "oxygen_sources")
     );
+
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = TagKey.create(
+        Registries.ITEM,
+        new ResourceLocation("northstar", "oxygen_sources_2")
+    );
+
+    private static boolean isAnyOxygenSource(ItemStack stack) {
+        return stack.is(OXYGEN_SOURCE_TAG) || stack.is(OXYGEN_SOURCE_TAG_2);
+    }
 
     private static ItemStack resolveLiveCuriosStack(ICuriosItemHandler inventory, SlotResult slotResult) {
         var slotContext = slotResult.slotContext();
@@ -60,10 +74,10 @@ public class NorthstarOxygenMixin {
 
         ICuriosItemHandler inventory = inventoryOptional.get();
 
-        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(OXYGEN_SOURCE_TAG))) {
+        for (SlotResult slotResult : inventory.findCurios(NorthstarOxygenMixin::isAnyOxygenSource)) {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
 
-            if (!liveStack.isEmpty() && liveStack.is(OXYGEN_SOURCE_TAG)) {
+            if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)) {
                 return liveStack;
             }
         }
@@ -80,10 +94,10 @@ public class NorthstarOxygenMixin {
 
         ICuriosItemHandler inventory = inventoryOptional.get();
 
-        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(OXYGEN_SOURCE_TAG))) {
+        for (SlotResult slotResult : inventory.findCurios(NorthstarOxygenMixin::isAnyOxygenSource)) {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
 
-            if (!liveStack.isEmpty() && liveStack.is(OXYGEN_SOURCE_TAG)
+            if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)
                     && canProvideOxygenWithoutConsuming(liveStack)) {
                 return liveStack;
             }
@@ -106,10 +120,10 @@ public class NorthstarOxygenMixin {
 
         ICuriosItemHandler inventory = inventoryOptional.get();
 
-        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(OXYGEN_SOURCE_TAG))) {
+        for (SlotResult slotResult : inventory.findCurios(NorthstarOxygenMixin::isAnyOxygenSource)) {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
 
-            if (!liveStack.isEmpty() && liveStack.is(OXYGEN_SOURCE_TAG)
+            if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)
                     && canProvideOxygenWithoutConsuming(liveStack)) {
                 return true;
             }
@@ -127,10 +141,10 @@ public class NorthstarOxygenMixin {
 
         ICuriosItemHandler inventory = inventoryOptional.get();
 
-        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(OXYGEN_SOURCE_TAG))) {
+        for (SlotResult slotResult : inventory.findCurios(NorthstarOxygenMixin::isAnyOxygenSource)) {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
 
-            if (!liveStack.isEmpty() && liveStack.is(OXYGEN_SOURCE_TAG)
+            if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)
                     && NorthstarOxygen.depleteOxygen(liveStack, shouldConsume)) {
                 return true;
             }
@@ -197,5 +211,29 @@ public class NorthstarOxygenMixin {
         if (!tank.isEmpty()) {
             cir.setReturnValue(tank);
         }
+    }
+
+    @Inject(method = "depleteOxygen", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void northstarCuriosCompat$expandOxygenCapacity(ItemStack stack, boolean consume, CallbackInfoReturnable<Boolean> cir) {
+        CompoundTag tag = stack.getTag();
+
+        if (tag == null || !tag.contains("Oxygen", Tag.TAG_INT)) {
+            cir.setReturnValue(false);
+            return;
+        }
+
+        int oxygen = tag.getInt("Oxygen");
+
+        if (oxygen <= 0) {
+            cir.setReturnValue(false);
+            return;
+        }
+
+        if (consume) {
+            int maxCapacity = stack.is(OXYGEN_SOURCE_TAG_2) ? EXPANDED_OXYGEN_CAPACITY : DEFAULT_OXYGEN_CAPACITY;
+            tag.putInt("Oxygen", Math.min(oxygen - 1, maxCapacity));
+        }
+
+        cir.setReturnValue(true);
     }
 }
