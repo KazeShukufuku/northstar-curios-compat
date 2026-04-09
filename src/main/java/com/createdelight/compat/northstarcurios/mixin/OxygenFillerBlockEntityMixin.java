@@ -1,8 +1,7 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
+import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.content.NorthstarTags;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -23,10 +22,7 @@ public class OxygenFillerBlockEntityMixin {
     private static final int DEFAULT_OXYGEN_CAPACITY = 1800;
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = TagKey.create(
-            Registries.ITEM,
-            new ResourceLocation("northstar", "oxygen_sources_2")
-    );
+        private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
     private static Container getContainer(Object self) {
         try {
@@ -41,7 +37,7 @@ public class OxygenFillerBlockEntityMixin {
     private void northstarCuriosCompat$acceptSecondOxygenSourceTag(CallbackInfoReturnable<ItemStack> cir) {
         ItemStack stack = getContainer(this).getItem(0);
 
-        if (!stack.isEmpty() && stack.is(OXYGEN_SOURCE_TAG_2)) {
+        if (!stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
             cir.setReturnValue(stack);
         }
     }
@@ -55,7 +51,7 @@ public class OxygenFillerBlockEntityMixin {
             remap = false
     )
     private boolean northstarCuriosCompat$acceptSecondTagInTooltip(NorthstarTags.NorthstarItemTags tag, ItemStack stack) {
-        return tag.matches(stack) || stack.is(OXYGEN_SOURCE_TAG_2);
+        return tag.matches(stack) || stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2));
     }
 
     @ModifyConstant(
@@ -66,7 +62,7 @@ public class OxygenFillerBlockEntityMixin {
     private double northstarCuriosCompat$dynamicOxygenTooltipCapacity(double original) {
         ItemStack stack = getContainer(this).getItem(0);
 
-        if (!stack.isEmpty() && stack.is(OXYGEN_SOURCE_TAG_2)) {
+        if (!stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
             return EXPANDED_OXYGEN_CAPACITY;
         }
 

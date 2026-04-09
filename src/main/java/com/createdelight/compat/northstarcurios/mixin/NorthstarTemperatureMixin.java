@@ -1,7 +1,6 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import com.createdelight.compat.northstarcurios.util.NullSafety;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,25 +23,13 @@ public class NorthstarTemperatureMixin {
 
     private static final int REQUIRED_PROTECTION_SCORE = 4;
 
-    private static final TagKey<Item> INSULATING_TAG = TagKey.create(
-            Registries.ITEM,
-            ResourceLocation.fromNamespaceAndPath("northstar", "insulating")
-    );
+        private static final TagKey<Item> INSULATING_TAG = NullSafety.northstarItemTag("insulating");
 
-    private static final TagKey<Item> INSULATING_2_TAG = TagKey.create(
-        Registries.ITEM,
-        ResourceLocation.fromNamespaceAndPath("northstar", "insulating_2")
-    );
+        private static final TagKey<Item> INSULATING_2_TAG = NullSafety.northstarItemTag("insulating_2");
 
-    private static final TagKey<Item> HEAT_RESISTANT_TAG = TagKey.create(
-            Registries.ITEM,
-            ResourceLocation.fromNamespaceAndPath("northstar", "heat_resistant")
-    );
+        private static final TagKey<Item> HEAT_RESISTANT_TAG = NullSafety.northstarItemTag("heat_resistant");
 
-    private static final TagKey<Item> HEAT_RESISTANT_2_TAG = TagKey.create(
-        Registries.ITEM,
-        ResourceLocation.fromNamespaceAndPath("northstar", "heat_resistant_2")
-    );
+        private static final TagKey<Item> HEAT_RESISTANT_2_TAG = NullSafety.northstarItemTag("heat_resistant_2");
 
     @Inject(method = "hasInsulation", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$hasInsulation(LivingEntity entity, CallbackInfoReturnable<Boolean> cir) {
@@ -72,7 +59,7 @@ public class NorthstarTemperatureMixin {
         }
 
         ICuriosItemHandler inventory = inventoryOptional.get();
-        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(baseTag) || stack.is(advancedTag))) {
+        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(NullSafety.nonNull(baseTag)) || stack.is(NullSafety.nonNull(advancedTag)))) {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
             if (!liveStack.isEmpty()) {
                 score += getProtectionValue(liveStack, baseTag, advancedTag);
@@ -83,10 +70,10 @@ public class NorthstarTemperatureMixin {
     }
 
     private static int getProtectionValue(ItemStack stack, TagKey<Item> baseTag, TagKey<Item> advancedTag) {
-        if (stack.is(advancedTag)) {
+        if (stack.is(NullSafety.nonNull(advancedTag))) {
             return 2;
         }
-        if (stack.is(baseTag)) {
+        if (stack.is(NullSafety.nonNull(baseTag))) {
             return 1;
         }
         return 0;

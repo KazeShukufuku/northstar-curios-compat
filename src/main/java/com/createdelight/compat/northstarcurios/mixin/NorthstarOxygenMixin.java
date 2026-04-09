@@ -1,10 +1,9 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
+import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.world.oxygen.NorthstarOxygen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,18 +28,12 @@ public class NorthstarOxygenMixin {
     private static final int DEFAULT_OXYGEN_CAPACITY = 1800;
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG = TagKey.create(
-            Registries.ITEM,
-            new ResourceLocation("northstar", "oxygen_sources")
-    );
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG = NullSafety.northstarItemTag("oxygen_sources");
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = TagKey.create(
-        Registries.ITEM,
-        new ResourceLocation("northstar", "oxygen_sources_2")
-    );
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
     private static boolean isAnyOxygenSource(ItemStack stack) {
-        return stack.is(OXYGEN_SOURCE_TAG) || stack.is(OXYGEN_SOURCE_TAG_2);
+        return stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG)) || stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2));
     }
 
     private static ItemStack resolveLiveCuriosStack(ICuriosItemHandler inventory, SlotResult slotResult) {
@@ -63,26 +56,6 @@ public class NorthstarOxygenMixin {
         }
 
         return stacks.getStackInSlot(slotIndex);
-    }
-
-    private static ItemStack getCuriosOxygenTank(LivingEntity entity) {
-        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
-
-        if (inventoryOptional.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
-
-        ICuriosItemHandler inventory = inventoryOptional.get();
-
-        for (SlotResult slotResult : inventory.findCurios(NorthstarOxygenMixin::isAnyOxygenSource)) {
-            ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
-
-            if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)) {
-                return liveStack;
-            }
-        }
-
-        return ItemStack.EMPTY;
     }
 
     private static ItemStack getUsableCuriosOxygenTank(LivingEntity entity) {
@@ -230,7 +203,7 @@ public class NorthstarOxygenMixin {
         }
 
         if (consume) {
-            int maxCapacity = stack.is(OXYGEN_SOURCE_TAG_2) ? EXPANDED_OXYGEN_CAPACITY : DEFAULT_OXYGEN_CAPACITY;
+            int maxCapacity = stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2)) ? EXPANDED_OXYGEN_CAPACITY : DEFAULT_OXYGEN_CAPACITY;
             tag.putInt("Oxygen", Math.min(oxygen - 1, maxCapacity));
         }
 

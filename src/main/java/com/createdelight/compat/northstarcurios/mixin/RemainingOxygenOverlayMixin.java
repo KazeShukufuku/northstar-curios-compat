@@ -1,5 +1,6 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
+import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.client.renderer.RemainingOxygenOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -23,7 +24,7 @@ public class RemainingOxygenOverlayMixin {
             remap = false
     )
     private int northstarCuriosCompat$stabilizeArmorOverlayOxygen(CompoundTag tag, String key) {
-        int observed = tag.getInt(key);
+        int observed = tag.getInt(NullSafety.nonNull(key));
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
 

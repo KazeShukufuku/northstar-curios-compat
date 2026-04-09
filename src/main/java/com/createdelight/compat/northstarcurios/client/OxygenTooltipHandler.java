@@ -1,12 +1,11 @@
 package com.createdelight.compat.northstarcurios.client;
 
 import com.createdelight.compat.northstarcurios.NorthstarCuriosCompatMod;
+import com.createdelight.compat.northstarcurios.util.NullSafety;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,16 +22,13 @@ public class OxygenTooltipHandler {
 
     private static final NumberFormat OXYGEN_NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = TagKey.create(
-            Registries.ITEM,
-            new ResourceLocation("northstar", "oxygen_sources_2")
-    );
+        private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
 
-        if (stack.isEmpty() || !stack.is(OXYGEN_SOURCE_TAG_2)) {
+        if (stack.isEmpty() || !stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
             return;
         }
 
@@ -46,7 +42,7 @@ public class OxygenTooltipHandler {
         String formattedOxygen = OXYGEN_NUMBER_FORMAT.format(oxygen);
 
         MutableComponent line = Component.translatable("northstar.gui.tooltip.oxygen")
-            .append(formattedOxygen)
+            .append(NullSafety.nonNull(formattedOxygen))
             .append("mB")
                 .withStyle(ChatFormatting.GRAY);
 

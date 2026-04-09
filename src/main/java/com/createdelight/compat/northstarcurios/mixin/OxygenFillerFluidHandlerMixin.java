@@ -1,9 +1,8 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
+import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.world.oxygen.NorthstarOxygen;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
@@ -22,10 +21,7 @@ public class OxygenFillerFluidHandlerMixin {
 
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = TagKey.create(
-            Registries.ITEM,
-            new ResourceLocation("northstar", "oxygen_sources_2")
-    );
+        private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
     private ItemStack getContainedItem(Object self) {
         try {
@@ -60,7 +56,7 @@ public class OxygenFillerFluidHandlerMixin {
     }
 
     private static boolean isExpandedTank(ItemStack stack) {
-        return !stack.isEmpty() && stack.is(OXYGEN_SOURCE_TAG_2);
+        return !stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2));
     }
 
     @Inject(method = "getTankCapacity", at = @At("HEAD"), cancellable = true, remap = false)
