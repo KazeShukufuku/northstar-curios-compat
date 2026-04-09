@@ -6,6 +6,7 @@
   "refmap": "northstar_curios_compat.refmap.json",
   "mixins": [
     "NorthstarOxygenMixin",
+    "NorthstarTemperatureMixin",
     "OxygenFillerBlockEntityMixin",
     "OxygenFillerFluidHandlerMixin"
   ],
