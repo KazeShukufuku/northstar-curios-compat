@@ -1,0 +1,8 @@
+{
+  "enchantment.northstar_curios_compat.space_walk": "太空行走",
+  "enchantment.northstar_curios_compat.space_walk.desc": "穿戴时在外星恢复为主世界重力表现。I级同时恢复地球坠落伤害；II级保留外星的低坠落伤害。",
+  "northstar_curios_compat.config.space_walk.allowedSlots": "太空行走：可附魔部位",
+  "northstar_curios_compat.config.space_walk.allowedSlots.tooltip": "太空行走附魔可应用的装备槽位。有效值：feet、legs、chest、head",
+  "northstar_curios_compat.config.space_walk.durabilityPerSecond": "太空行走：每秒耐久消耗",
+  "northstar_curios_compat.config.space_walk.durabilityPerSecond.tooltip": "太空行走附魔主动修正重力时每秒消耗的耐久度。设为 0 则不消耗耐久。"
+}
