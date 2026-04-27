@@ -7,6 +7,8 @@
   "mixins": [
     "NorthstarOxygenMixin",
     "NorthstarTemperatureMixin",
+    "SpaceWalkFallDamageMixin",
+    "SpaceWalkGravityMixin",
     "OxygenFillerBlockEntityMixin",
     "OxygenFillerFluidHandlerMixin"
   ],

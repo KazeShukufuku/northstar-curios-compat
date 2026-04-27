@@ -21,5 +21,3 @@ forge-mdk.zip
 # Local publishing assets (do not commit)
 assets/curseforge-cover-*.png
 assets/generate_cover*.ps1
-
-gradle.properties
