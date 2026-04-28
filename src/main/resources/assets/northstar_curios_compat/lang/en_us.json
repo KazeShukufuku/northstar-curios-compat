@@ -3,6 +3,10 @@
   "enchantment.northstar_curios_compat.space_walk.desc": "Restores earth-like gravity on alien worlds while worn. Level I also restores earth fall damage; Level II keeps the reduced alien fall damage.",
   "northstar_curios_compat.config.space_walk.allowedSlots": "Space Walk: Allowed Slots",
   "northstar_curios_compat.config.space_walk.allowedSlots.tooltip": "Equipment slots the Space Walk enchantment can be applied to. Valid values: feet, legs, chest, head",
+  "northstar_curios_compat.config.space_walk.discoverable": "Space Walk: Available in Enchanting Table",
+  "northstar_curios_compat.config.space_walk.discoverable.tooltip": "Whether the Space Walk enchantment can appear in the enchanting table.",
+  "northstar_curios_compat.config.space_walk.tradeable": "Space Walk: Available in Villager Trades",
+  "northstar_curios_compat.config.space_walk.tradeable.tooltip": "Whether the Space Walk enchantment can be obtained through villager trades.",
   "northstar_curios_compat.config.space_walk.durabilityPerSecond": "Space Walk: Durability per Second",
   "northstar_curios_compat.config.space_walk.durabilityPerSecond.tooltip": "Durability consumed per second while Space Walk actively enforces earth-like gravity. Set to 0 to disable durability consumption."
 }

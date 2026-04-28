@@ -43,11 +43,11 @@ public class SpaceWalkEnchantment extends Enchantment {
 
     @Override
     public boolean isTradeable() {
-        return true;
+        return NorthstarCuriosCompatConfig.tradeable();
     }
 
     @Override
     public boolean isDiscoverable() {
-        return true;
+        return NorthstarCuriosCompatConfig.discoverable();
     }
 }

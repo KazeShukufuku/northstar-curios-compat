@@ -27,6 +27,14 @@ public final class NorthstarCuriosCompatConfig {
         return COMMON.durabilityPerSecond.get();
     }
 
+    public static boolean discoverable() {
+        return COMMON.discoverable.get();
+    }
+
+    public static boolean tradeable() {
+        return COMMON.tradeable.get();
+    }
+
     public static Set<EquipmentSlot> allowedEquipmentSlots() {
         return COMMON.allowedSlots.get().stream()
                 .map(s -> switch (s.toLowerCase()) {
@@ -42,6 +50,8 @@ public final class NorthstarCuriosCompatConfig {
 
     public static final class Common {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> allowedSlots;
+        public final ForgeConfigSpec.BooleanValue discoverable;
+        public final ForgeConfigSpec.BooleanValue tradeable;
         public final ForgeConfigSpec.DoubleValue durabilityPerSecond;
 
         private static final List<String> VALID_SLOTS = List.of("feet", "legs", "chest", "head");
@@ -54,6 +64,14 @@ public final class NorthstarCuriosCompatConfig {
                     .translation("northstar_curios_compat.config.space_walk.allowedSlots")
                     .defineListAllowEmpty("allowedSlots", List.of("feet"),
                             e -> e instanceof String s && VALID_SLOTS.contains(s.toLowerCase()));
+            discoverable = builder
+                    .comment("Whether Space Walk can appear in the enchanting table.")
+                    .translation("northstar_curios_compat.config.space_walk.discoverable")
+                    .define("discoverable", false);
+            tradeable = builder
+                    .comment("Whether Space Walk can be obtained through villager trades.")
+                    .translation("northstar_curios_compat.config.space_walk.tradeable")
+                    .define("tradeable", false);
             durabilityPerSecond = builder
                     .comment("Durability consumed per second while Space Walk actively enforces earth-like gravity.",
                             "Set to 0 to disable durability consumption.")
