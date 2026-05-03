@@ -24,23 +24,9 @@ public class GuiGraphicsOxygenBarMixin {
 
     @Inject(
             method = "renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V",
-            at = @At("TAIL"),
-            require = 0
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V")
     )
     private void northstarCuriosCompat$renderTag2OxygenBar(Font font, ItemStack stack, int x, int y, String text, CallbackInfo ci) {
-        northstarCuriosCompat$renderTag2OxygenBar0(stack, x, y);
-    }
-
-    @Inject(
-            method = "renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V",
-            at = @At("TAIL"),
-            require = 0
-    )
-    private void northstarCuriosCompat$renderTag2OxygenBarNoText(Font font, ItemStack stack, int x, int y, CallbackInfo ci) {
-        northstarCuriosCompat$renderTag2OxygenBar0(stack, x, y);
-    }
-
-    private void northstarCuriosCompat$renderTag2OxygenBar0(ItemStack stack, int x, int y) {
         if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
             return;
         }
