@@ -64,7 +64,10 @@ mixin {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     dependsOn tasks.named('createMcpToSrg')
-    options.compilerArgs += ["-AreobfTsrgFile=${rootProject.file('build/createMcpToSrg/output.tsrg').absolutePath}"]
+    options.compilerArgs += [
+        "-AreobfTsrgFile=${rootProject.file('build/createMcpToSrg/output.tsrg').absolutePath}",
+        "-AdefaultObfuscationEnv=searge"
+    ]
 }
 
 tasks.withType(AbstractArchiveTask).configureEach {
@@ -73,6 +76,7 @@ tasks.withType(AbstractArchiveTask).configureEach {
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
             'Specification-Title': mod_name,
