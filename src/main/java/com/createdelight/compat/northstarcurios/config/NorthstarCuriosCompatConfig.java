@@ -1,21 +1,22 @@
 package com.createdelight.compat.northstarcurios.config;
 
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.createdelight.compat.northstarcurios.util.NullSafety;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 public final class NorthstarCuriosCompatConfig {
 
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
     public static final Common COMMON;
 
     static {
-        Pair<Common, ForgeConfigSpec> pair = new ForgeConfigSpec.Builder().configure(Common::new);
+        Pair<Common, ModConfigSpec> pair = new ModConfigSpec.Builder().configure(Common::new);
         COMMON = pair.getLeft();
         SPEC = pair.getRight();
     }
@@ -35,41 +36,42 @@ public final class NorthstarCuriosCompatConfig {
         return COMMON.tradeable.get();
     }
 
-    public static Set<EquipmentSlot> allowedEquipmentSlots() {
-        return COMMON.allowedSlots.get().stream()
-                .map(s -> switch (s.toLowerCase()) {
-                    case "feet"  -> EquipmentSlot.FEET;
-                    case "legs"  -> EquipmentSlot.LEGS;
-                    case "chest" -> EquipmentSlot.CHEST;
-                    case "head"  -> EquipmentSlot.HEAD;
-                    default      -> null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+    public static EquipmentSlot[] allowedEquipmentSlots() {
+        List<? extends String> names = COMMON.allowedSlots.get();
+        List<EquipmentSlot> result = new ArrayList<>(names.size());
+        for (String name : names) {
+            switch (name.toLowerCase(Locale.ROOT)) {
+                case "feet"  -> result.add(EquipmentSlot.FEET);
+                case "legs"  -> result.add(EquipmentSlot.LEGS);
+                case "chest" -> result.add(EquipmentSlot.CHEST);
+                case "head"  -> result.add(EquipmentSlot.HEAD);
+            }
+        }
+        return result.toArray(new EquipmentSlot[0]);
     }
 
     public static final class Common {
-        public final ForgeConfigSpec.ConfigValue<List<? extends String>> allowedSlots;
-        public final ForgeConfigSpec.BooleanValue discoverable;
-        public final ForgeConfigSpec.BooleanValue tradeable;
-        public final ForgeConfigSpec.DoubleValue durabilityPerSecond;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> allowedSlots;
+        public final ModConfigSpec.BooleanValue discoverable;
+        public final ModConfigSpec.BooleanValue tradeable;
+        public final ModConfigSpec.DoubleValue durabilityPerSecond;
 
-        private static final List<String> VALID_SLOTS = List.of("feet", "legs", "chest", "head");
-
-        Common(ForgeConfigSpec.Builder builder) {
+        Common(ModConfigSpec.Builder builder) {
             builder.push("space_walk");
             allowedSlots = builder
-                    .comment("Equipment slots the Space Walk enchantment can be applied to via the enchanting table.",
+                    .comment("Equipment slots that can receive the Space Walk enchantment.",
                             "Valid values: feet, legs, chest, head")
                     .translation("northstar_curios_compat.config.space_walk.allowedSlots")
-                    .defineListAllowEmpty("allowedSlots", List.of("feet"),
-                            e -> e instanceof String s && VALID_SLOTS.contains(s.toLowerCase()));
+                    .defineListAllowEmpty("allowedSlots",
+                            NullSafety.nonNull(List.of("feet")),
+                            () -> "feet",
+                            s -> s instanceof String str && isValidSlot(str));
             discoverable = builder
-                    .comment("Whether Space Walk can appear in the enchanting table.")
+                    .comment("Whether the Space Walk enchantment can appear in the enchanting table.")
                     .translation("northstar_curios_compat.config.space_walk.discoverable")
                     .define("discoverable", false);
             tradeable = builder
-                    .comment("Whether Space Walk can be obtained through villager trades.")
+                    .comment("Whether the Space Walk enchantment can be obtained through villager trades.")
                     .translation("northstar_curios_compat.config.space_walk.tradeable")
                     .define("tradeable", false);
             durabilityPerSecond = builder
@@ -79,5 +81,12 @@ public final class NorthstarCuriosCompatConfig {
                     .defineInRange("durabilityPerSecond", 1.0D, 0.0D, 1000.0D);
             builder.pop();
         }
+    }
+
+    private static boolean isValidSlot(String s) {
+        return switch (s.toLowerCase(Locale.ROOT)) {
+            case "feet", "legs", "chest", "head" -> true;
+            default -> false;
+        };
     }
 }

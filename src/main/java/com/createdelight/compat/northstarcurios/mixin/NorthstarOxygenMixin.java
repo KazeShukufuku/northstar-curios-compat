@@ -2,15 +2,13 @@ package com.createdelight.compat.northstarcurios.mixin;
 
 import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.world.oxygen.NorthstarOxygen;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.living.LivingBreatheEvent;
+import net.neoforged.neoforge.event.entity.living.LivingBreatheEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,7 +23,6 @@ import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 @Mixin(value = NorthstarOxygen.class, remap = false)
 public class NorthstarOxygenMixin {
 
-    private static final int DEFAULT_OXYGEN_CAPACITY = 1800;
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
     private static final TagKey<Item> OXYGEN_SOURCE_TAG = NullSafety.northstarItemTag("oxygen_sources");
@@ -59,7 +56,7 @@ public class NorthstarOxygenMixin {
     }
 
     private static ItemStack getUsableCuriosOxygenTank(LivingEntity entity) {
-        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
+        var inventoryOptional = CuriosApi.getCuriosInventory(entity);
 
         if (inventoryOptional.isEmpty()) {
             return ItemStack.EMPTY;
@@ -85,7 +82,7 @@ public class NorthstarOxygenMixin {
     }
 
     private static boolean hasUsableCuriosOxygenTank(LivingEntity entity) {
-        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
+        var inventoryOptional = CuriosApi.getCuriosInventory(entity);
 
         if (inventoryOptional.isEmpty()) {
             return false;
@@ -106,7 +103,7 @@ public class NorthstarOxygenMixin {
     }
 
     private static boolean consumeFromAnyCuriosTank(LivingEntity entity, boolean shouldConsume) {
-        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
+        var inventoryOptional = CuriosApi.getCuriosInventory(entity);
 
         if (inventoryOptional.isEmpty()) {
             return false;
@@ -158,7 +155,6 @@ public class NorthstarOxygenMixin {
         if (level.isClientSide()) {
             if (hasUsableAnyOxygenTank(entity)) {
                 event.setCanBreathe(true);
-                event.setCanRefillAir(true);
                 ci.cancel();
             }
             return;
@@ -172,7 +168,6 @@ public class NorthstarOxygenMixin {
 
         if (canBreatheFromCurios) {
             event.setCanBreathe(true);
-            event.setCanRefillAir(true);
             ci.cancel();
         }
     }
@@ -188,14 +183,12 @@ public class NorthstarOxygenMixin {
 
     @Inject(method = "depleteOxygen", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$expandOxygenCapacity(ItemStack stack, boolean consume, CallbackInfoReturnable<Boolean> cir) {
-        CompoundTag tag = stack.getTag();
-
-        if (tag == null || !tag.contains("Oxygen", Tag.TAG_INT)) {
-            cir.setReturnValue(false);
+        // Only intercept expanded-capacity items; let the original method handle regular tanks.
+        if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
             return;
         }
 
-        int oxygen = tag.getInt("Oxygen");
+        int oxygen = NullSafety.getOxygen(stack);
 
         if (oxygen <= 0) {
             cir.setReturnValue(false);
@@ -203,8 +196,7 @@ public class NorthstarOxygenMixin {
         }
 
         if (consume) {
-            int maxCapacity = stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2)) ? EXPANDED_OXYGEN_CAPACITY : DEFAULT_OXYGEN_CAPACITY;
-            tag.putInt("Oxygen", Math.min(oxygen - 1, maxCapacity));
+            NullSafety.setOxygen(stack, Math.min(oxygen - 1, EXPANDED_OXYGEN_CAPACITY));
         }
 
         cir.setReturnValue(true);

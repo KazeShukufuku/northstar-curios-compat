@@ -1,0 +1,20 @@
+{
+  "description": {
+    "translate": "enchantment.northstar_curios_compat.space_walk"
+  },
+  "supported_items": "#minecraft:enchantable/foot_armor",
+  "weight": 3,
+  "max_level": 2,
+  "min_cost": {
+    "base": 20,
+    "per_level_above_first": 10
+  },
+  "max_cost": {
+    "base": 50,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "feet"
+  ]
+}

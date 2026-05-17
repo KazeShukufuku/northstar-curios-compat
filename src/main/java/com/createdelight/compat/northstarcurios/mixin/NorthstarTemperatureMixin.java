@@ -53,7 +53,7 @@ public class NorthstarTemperatureMixin {
         score += getProtectionValue(entity.getItemBySlot(EquipmentSlot.LEGS), baseTag, advancedTag);
         score += getProtectionValue(entity.getItemBySlot(EquipmentSlot.FEET), baseTag, advancedTag);
 
-        var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
+        var inventoryOptional = CuriosApi.getCuriosInventory(entity);
         if (inventoryOptional.isEmpty()) {
             return score;
         }

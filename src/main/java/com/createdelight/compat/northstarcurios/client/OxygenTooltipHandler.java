@@ -3,26 +3,25 @@ package com.createdelight.compat.northstarcurios.client;
 import com.createdelight.compat.northstarcurios.NorthstarCuriosCompatMod;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 import java.text.NumberFormat;
 import java.util.Locale;
 
-@Mod.EventBusSubscriber(modid = NorthstarCuriosCompatMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = NorthstarCuriosCompatMod.MOD_ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class OxygenTooltipHandler {
 
     private static final NumberFormat OXYGEN_NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
 
-        private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
@@ -32,8 +31,7 @@ public class OxygenTooltipHandler {
             return;
         }
 
-        CompoundTag tag = stack.getTag();
-        int oxygen = tag != null ? tag.getInt("Oxygen") : 0;
+        int oxygen = NullSafety.getOxygen(stack);
 
         if (oxygen < 0) {
             oxygen = 0;

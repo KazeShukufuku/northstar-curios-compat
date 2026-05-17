@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[1,)"
 license="MIT"
 
 [[mods]]
@@ -12,29 +12,29 @@ Adds Curios oxygen source support to Northstar by reading oxygen tank tags from 
 '''
 
 [[dependencies.northstar_curios_compat]]
-modId="forge"
-mandatory=true
-versionRange="[47.4,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.northstar_curios_compat]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1]"
+type="required"
+versionRange="[1.21.1,1.22)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.northstar_curios_compat]]
 modId="northstar"
-mandatory=true
+type="required"
 versionRange="[0.5.4,)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.northstar_curios_compat]]
 modId="curios"
-mandatory=true
-versionRange="[5.14,)"
+type="required"
+versionRange="[9.0,)"
 ordering="AFTER"
 side="BOTH"

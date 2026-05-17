@@ -4,7 +4,6 @@ import com.createdelight.compat.northstarcurios.util.NullSafety;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -24,15 +23,15 @@ public class GuiGraphicsOxygenBarMixin {
 
     @Inject(
             method = "renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V")
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"),
+            remap = false
     )
     private void northstarCuriosCompat$renderTag2OxygenBar(Font font, ItemStack stack, int x, int y, String text, CallbackInfo ci) {
         if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
             return;
         }
 
-        CompoundTag tag = stack.getOrCreateTag();
-        int oxygen = Math.max(0, tag.getInt("Oxygen"));
+        int oxygen = NullSafety.getOxygen(stack);
         float filled = oxygen / (float) EXPANDED_OXYGEN_CAPACITY;
         int barWidth = (int) (13.0F * filled);
 

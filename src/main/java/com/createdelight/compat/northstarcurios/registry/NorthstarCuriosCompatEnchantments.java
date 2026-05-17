@@ -1,19 +1,23 @@
 package com.createdelight.compat.northstarcurios.registry;
 
 import com.createdelight.compat.northstarcurios.NorthstarCuriosCompatMod;
-import com.createdelight.compat.northstarcurios.enchantment.SpaceWalkEnchantment;
+import com.createdelight.compat.northstarcurios.util.NullSafety;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
+/**
+ * Enchantments are data-driven in 1.21.1. The actual enchantment definition lives in
+ * data/northstar_curios_compat/enchantment/space_walk.json.
+ * This class only holds the ResourceKey used to look up the enchantment at runtime.
+ */
 public final class NorthstarCuriosCompatEnchantments {
 
-    public static final DeferredRegister<Enchantment> ENCHANTMENTS =
-            DeferredRegister.create(ForgeRegistries.ENCHANTMENTS, NorthstarCuriosCompatMod.MOD_ID);
-
-    public static final RegistryObject<Enchantment> SPACE_WALK =
-            ENCHANTMENTS.register("space_walk", SpaceWalkEnchantment::new);
+    public static final ResourceKey<Enchantment> SPACE_WALK = ResourceKey.create(
+            NullSafety.nonNull(Registries.ENCHANTMENT),
+            NullSafety.nonNull(ResourceLocation.fromNamespaceAndPath(NorthstarCuriosCompatMod.MOD_ID, "space_walk"))
+    );
 
     private NorthstarCuriosCompatEnchantments() {
     }

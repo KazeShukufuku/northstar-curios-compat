@@ -5,16 +5,19 @@ import com.createdelight.compat.northstarcurios.config.NorthstarCuriosCompatConf
 import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatEnchantments;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.world.dimension.NorthstarPlanets;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-@Mod.EventBusSubscriber(modid = NorthstarCuriosCompatMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = NorthstarCuriosCompatMod.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class SpaceWalkGravityHandler {
 
     private static final String SPACE_WALK_DURABILITY_PROGRESS_KEY =
@@ -24,12 +27,8 @@ public final class SpaceWalkGravityHandler {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-
-        Player player = event.player;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        Player player = event.getEntity();
         if (!player.isAlive()) {
             return;
         }
@@ -82,7 +81,7 @@ public final class SpaceWalkGravityHandler {
                 break;
             }
 
-            source.stack().hurtAndBreak(1, player, p -> p.broadcastBreakEvent(NullSafety.nonNull(source.slot())));
+            source.stack().hurtAndBreak(1, player, NullSafety.nonNull(source.slot()));
             if (source.stack().isEmpty()) {
                 progress = 0.0D;
                 break;
@@ -101,14 +100,16 @@ public final class SpaceWalkGravityHandler {
     }
 
     private static EquippedSpaceWalkSource findSpaceWalkSource(Player player) {
-        for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD}) {
-            ItemStack stack = player.getItemBySlot(NullSafety.nonNull(slot));
-            if (stack.isEmpty()) {
-                continue;
-            }
+        var lookup = player.level().registryAccess().lookup(NullSafety.nonNull(Registries.ENCHANTMENT));
+        if (lookup.isEmpty()) return null;
+        var holderOpt = lookup.get().get(NullSafety.nonNull(NorthstarCuriosCompatEnchantments.SPACE_WALK));
+        if (holderOpt.isEmpty()) return null;
+        Holder<Enchantment> spaceWalk = NullSafety.nonNull(holderOpt.get());
 
-            int level = stack.getEnchantmentLevel(NullSafety.nonNull(NorthstarCuriosCompatEnchantments.SPACE_WALK.get()));
-            if (level > 0) {
+        for (EquipmentSlot slot : NorthstarCuriosCompatConfig.allowedEquipmentSlots()) {
+            ItemStack stack = player.getItemBySlot(NullSafety.nonNull(slot));
+            if (stack.isEmpty()) continue;
+            if (stack.getOrDefault(NullSafety.enchantmentsComponent(), NullSafety.emptyEnchantments()).getLevel(spaceWalk) > 0) {
                 return new EquippedSpaceWalkSource(slot, stack);
             }
         }

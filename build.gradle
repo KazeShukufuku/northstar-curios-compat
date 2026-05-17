@@ -1,43 +1,26 @@
 plugins {
     id 'java'
-    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
+    id 'net.neoforged.gradle.userdev' version '7.0.145'
 }
 
 group = mod_group
 version = mod_version
 
 base {
-    archivesName = 'northstar-curios-compat'
+    archivesName = 'northstar-curios-compat-neoforge'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-minecraft {
-    mappings channel: 'official', version: minecraft_version
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
-        }
-        server {
-            workingDirectory project.file('run')
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
-        }
+runs {
+    configureEach {
+        modSource project.sourceSets.main
     }
+    client { }
+    server { }
 }
 
 repositories {
-    mavenCentral()
     maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     maven {
         url = 'https://cursemaven.com'
@@ -48,25 +31,21 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation "net.neoforged:neoforge:${neoforge_version}"
 
-    compileOnly fg.deobf("curse.maven:northstar-redux-${northstar_redux_cf}")
-    compileOnly fg.deobf("curse.maven:curios-${curios_cf}")
+    compileOnly "curse.maven:northstar-redux-${northstar_redux_cf}"
+    compileOnly "curse.maven:curios-${curios_cf}"
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
-mixin {
-    add sourceSets.main, 'northstar_curios_compat.refmap.json'
-    config 'northstar_curios_compat.mixins.json'
-}
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    dependsOn tasks.named('createMcpToSrg')
-    options.compilerArgs += [
-        "-AreobfTsrgFile=${rootProject.file('build/createMcpToSrg/output.tsrg').absolutePath}",
-        "-AdefaultObfuscationEnv=searge"
+    options.fork = true
+    options.forkOptions.jvmArgs += [
+        '-Dfile.encoding=UTF-8',
+        '-Dstdout.encoding=UTF-8',
+        '-Dstderr.encoding=UTF-8'
     ]
 }
 

@@ -2,13 +2,12 @@ package com.createdelight.compat.northstarcurios.mixin;
 
 import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.world.oxygen.NorthstarOxygen;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,12 +15,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.lang.reflect.Method;
 
+// Anonymous inner class ($1) cannot be referenced by class literal; targets string is the only option.
+// The "could not be fully resolved" warning is expected and does not affect runtime behaviour.
+@SuppressWarnings("UnresolvedMixinReference")
 @Mixin(targets = "com.lightning.northstar.block.tech.oxygen_filler.OxygenFillerBlockEntity$1", remap = false)
 public class OxygenFillerFluidHandlerMixin {
 
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
-        private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
     private ItemStack getContainedItem(Object self) {
         try {
@@ -78,7 +80,7 @@ public class OxygenFillerFluidHandlerMixin {
             IFluidHandler.FluidAction action,
             CallbackInfoReturnable<Integer> cir
     ) {
-        ItemStack stack = getContainedItem(this);
+        ItemStack stack = NullSafety.nonNull(getContainedItem(this));
 
         if (!isExpandedTank(stack)) {
             return;
@@ -89,12 +91,11 @@ public class OxygenFillerFluidHandlerMixin {
             return;
         }
 
-        CompoundTag tag = stack.getOrCreateTag();
-        int oxygen = tag.getInt("Oxygen");
+        int oxygen = NullSafety.getOxygen(stack);
         int fillAmount = Mth.clamp(EXPANDED_OXYGEN_CAPACITY - oxygen, 0, resource.getAmount());
 
         if (action.execute() && fillAmount > 0) {
-            tag.putInt("Oxygen", oxygen + fillAmount);
+            NullSafety.setOxygen(stack, oxygen + fillAmount);
             sendData(this);
         }
 

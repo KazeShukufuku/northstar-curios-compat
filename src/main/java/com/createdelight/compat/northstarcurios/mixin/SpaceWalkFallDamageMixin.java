@@ -1,8 +1,11 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
+import com.createdelight.compat.northstarcurios.config.NorthstarCuriosCompatConfig;
 import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatEnchantments;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.world.dimension.NorthstarPlanets;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -10,6 +13,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,8 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = LivingEntity.class, priority = 500)
 public class SpaceWalkFallDamageMixin {
 
-    @SuppressWarnings("InvalidMemberReference")
-    @Inject(method = "m_5639_", at = @At("HEAD"), remap = false, require = 0, cancellable = true)
+    @Inject(method = "calculateFallDamage", at = @At("HEAD"), remap = false, require = 0, cancellable = true)
     private void northstarCuriosCompat$restoreEarthFallDamage(
             float pFallDistance, float pDamageMultiplier, CallbackInfoReturnable<Integer> ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
@@ -32,7 +35,6 @@ public class SpaceWalkFallDamageMixin {
             return;
         }
 
-        // Only act in alien dimensions with reduced gravity (skip orbit and earth)
         if (NorthstarPlanets.hasNormalGrav(entity.level().dimension())) {
             return;
         }
@@ -54,16 +56,17 @@ public class SpaceWalkFallDamageMixin {
     }
 
     private static int getSpaceWalkLevel(Player player) {
-        for (EquipmentSlot slot : new EquipmentSlot[]{
-                EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD}) {
+        var lookup = player.level().registryAccess().lookup(NullSafety.nonNull(Registries.ENCHANTMENT));
+        if (lookup.isEmpty()) return 0;
+        var holderOpt = lookup.get().get(NullSafety.nonNull(NorthstarCuriosCompatEnchantments.SPACE_WALK));
+        if (holderOpt.isEmpty()) return 0;
+        Holder<Enchantment> spaceWalk = NullSafety.nonNull(holderOpt.get());
+
+        for (EquipmentSlot slot : NorthstarCuriosCompatConfig.allowedEquipmentSlots()) {
             ItemStack stack = player.getItemBySlot(NullSafety.nonNull(slot));
-            if (stack.isEmpty()) {
-                continue;
-            }
-            int level = stack.getEnchantmentLevel(NullSafety.nonNull(NorthstarCuriosCompatEnchantments.SPACE_WALK.get()));
-            if (level > 0) {
-                return level;
-            }
+            if (stack.isEmpty()) continue;
+            int level = stack.getOrDefault(NullSafety.enchantmentsComponent(), NullSafety.emptyEnchantments()).getLevel(spaceWalk);
+            if (level > 0) return level;
         }
         return 0;
     }

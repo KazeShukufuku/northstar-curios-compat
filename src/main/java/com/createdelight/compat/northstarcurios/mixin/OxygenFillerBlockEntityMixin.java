@@ -1,6 +1,7 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
 import com.createdelight.compat.northstarcurios.util.NullSafety;
+import com.lightning.northstar.block.tech.oxygen_filler.OxygenFillerBlockEntity;
 import com.lightning.northstar.content.NorthstarTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.lang.reflect.Field;
 
-@Mixin(targets = "com.lightning.northstar.block.tech.oxygen_filler.OxygenFillerBlockEntity", remap = false)
+@Mixin(value = OxygenFillerBlockEntity.class, remap = false)
 public class OxygenFillerBlockEntityMixin {
 
     private static final int DEFAULT_OXYGEN_CAPACITY = 1800;
