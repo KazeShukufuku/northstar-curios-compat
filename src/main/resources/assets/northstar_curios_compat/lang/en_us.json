@@ -4,9 +4,9 @@
   "northstar_curios_compat.config.space_walk.allowedSlots": "Space Walk: Enchantable Slots",
   "northstar_curios_compat.config.space_walk.allowedSlots.tooltip": "Equipment slots that can receive the Space Walk enchantment. Valid values: feet, legs, chest, head",
   "northstar_curios_compat.config.space_walk.discoverable": "Space Walk: Available in Enchanting Table",
-  "northstar_curios_compat.config.space_walk.discoverable.tooltip": "Whether the Space Walk enchantment can appear in the enchanting table. Requires restart.",
+  "northstar_curios_compat.config.space_walk.discoverable.tooltip": "Whether the Space Walk enchantment can appear in the enchanting table. Requires reloading the world.",
   "northstar_curios_compat.config.space_walk.tradeable": "Space Walk: Available in Villager Trades",
-  "northstar_curios_compat.config.space_walk.tradeable.tooltip": "Whether the Space Walk enchantment can be obtained through villager trades. Requires restart.",
+  "northstar_curios_compat.config.space_walk.tradeable.tooltip": "Whether the Space Walk enchantment can be obtained through villager trades. Requires reloading the world.",
   "northstar_curios_compat.config.space_walk.durabilityPerSecond": "Space Walk: Durability per Second",
   "northstar_curios_compat.config.space_walk.durabilityPerSecond.tooltip": "Durability consumed per second while Space Walk actively enforces earth-like gravity. Set to 0 to disable durability consumption."
 }

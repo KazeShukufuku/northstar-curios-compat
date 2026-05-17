@@ -4,9 +4,9 @@
   "northstar_curios_compat.config.space_walk.allowedSlots": "太空行走：可附魔部位",
   "northstar_curios_compat.config.space_walk.allowedSlots.tooltip": "可以附上太空行走附魔的装备槽位。有效值：feet、legs、chest、head",
   "northstar_curios_compat.config.space_walk.discoverable": "太空行走：可在附魔台获得",
-  "northstar_curios_compat.config.space_walk.discoverable.tooltip": "太空行走附魔是否可在附魔台中出现。需要重启游戏。",
+  "northstar_curios_compat.config.space_walk.discoverable.tooltip": "太空行走附魔是否可在附魔台中出现。需要重进存档。",
   "northstar_curios_compat.config.space_walk.tradeable": "太空行走：可通过村民交易获得",
-  "northstar_curios_compat.config.space_walk.tradeable.tooltip": "太空行走附魔是否可通过村民交易获得。需要重启游戏。",
+  "northstar_curios_compat.config.space_walk.tradeable.tooltip": "太空行走附魔是否可通过村民交易获得。需要重进存档。",
   "northstar_curios_compat.config.space_walk.durabilityPerSecond": "太空行走：每秒耐久消耗",
   "northstar_curios_compat.config.space_walk.durabilityPerSecond.tooltip": "太空行走附魔主动修正重力时每秒消耗的耐久度。设为 0 则不消耗耐久。"
 }
