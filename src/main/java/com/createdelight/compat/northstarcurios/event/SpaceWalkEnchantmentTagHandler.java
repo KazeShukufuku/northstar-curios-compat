@@ -9,7 +9,6 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,51 +17,47 @@ import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Applies config-driven changes to the Space Walk enchantment at data-pack load time:
+ * Applies config-driven changes to Space Walk at data-pack load time.
  *
  * <ul>
- *   <li>{@code allowedSlots} — rebuilds {@code supportedItems} and {@code slots} on the
- *       enchantment definition from the slot-specific enchantable item tags, so only items worn
- *       in the allowed slots can receive or benefit from the enchantment.</li>
- *   <li>{@code discoverable} — if {@code false}, removes the enchantment from the
- *       {@code minecraft:in_enchanting_table} tag and sets {@code primaryItems} to empty so the
- *       enchanting table never offers it. If {@code true}, clears {@code primaryItems} so it falls
- *       back to {@code supportedItems}.</li>
- *   <li>{@code tradeable} — if {@code false}, removes the enchantment from
- *       {@code minecraft:tradeable}.</li>
+ *   <li>{@code allowedSlots} updates the backing item tag used by Space Walk's
+ *       {@code supported_items} field, so vanilla/NeoForge enchantment checks see
+ *       the configured armor slots without a mixin.</li>
+ *   <li>{@code discoverable} removes the enchantment from
+ *       {@code minecraft:in_enchanting_table} when disabled.</li>
+ *   <li>{@code tradeable} removes the enchantment from {@code minecraft:tradeable}
+ *       when disabled.</li>
  * </ul>
- *
- * <p>All changes require a game restart to take effect.</p>
  */
 @EventBusSubscriber(modid = NorthstarCuriosCompatMod.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class SpaceWalkEnchantmentTagHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceWalkEnchantmentTagHandler.class);
 
-    private static final TagKey<Enchantment> IN_ENCHANTING_TABLE = NullSafety.enchantmentTag("minecraft", "in_enchanting_table");
-    private static final TagKey<Enchantment> TRADEABLE             = NullSafety.enchantmentTag("minecraft", "tradeable");
+    private static final TagKey<Enchantment> IN_ENCHANTING_TABLE =
+            NullSafety.enchantmentTag("minecraft", "in_enchanting_table");
+    private static final TagKey<Enchantment> TRADEABLE =
+            NullSafety.enchantmentTag("minecraft", "tradeable");
+    private static final TagKey<Item> SPACE_WALK_SUPPORTED_ITEMS =
+            NullSafety.itemTag(NorthstarCuriosCompatMod.MOD_ID, "enchantable/space_walk");
 
-    /** Maps slot config name → the corresponding {@code #minecraft:enchantable/xxx_armor} item tag. */
+    /** Maps slot config name to the corresponding {@code #minecraft:enchantable/xxx_armor} item tag. */
     private static final Map<String, TagKey<Item>> SLOT_TO_ENCHANTABLE_TAG = Map.of(
-            "feet",  NullSafety.itemTag("minecraft", "enchantable/foot_armor"),
-            "legs",  NullSafety.itemTag("minecraft", "enchantable/leg_armor"),
+            "feet", NullSafety.itemTag("minecraft", "enchantable/foot_armor"),
+            "legs", NullSafety.itemTag("minecraft", "enchantable/leg_armor"),
             "chest", NullSafety.itemTag("minecraft", "enchantable/chest_armor"),
-            "head",  NullSafety.itemTag("minecraft", "enchantable/head_armor"));
+            "head", NullSafety.itemTag("minecraft", "enchantable/head_armor"));
 
     private SpaceWalkEnchantmentTagHandler() {
     }
@@ -70,110 +65,67 @@ public final class SpaceWalkEnchantmentTagHandler {
     @SubscribeEvent
     public static void onTagsUpdated(TagsUpdatedEvent event) {
         RegistryAccess registryAccess = event.getRegistryAccess();
+        updateSupportedItemTag(registryAccess);
 
         registryAccess.lookup(NullSafety.nonNull(Registries.ENCHANTMENT)).ifPresent(enchLookup ->
                 enchLookup.get(NullSafety.nonNull(NorthstarCuriosCompatEnchantments.SPACE_WALK)).ifPresent(holder -> {
-                    // Always update supportedItems / slots / primaryItems from config
-                    updateEnchantmentDefinition(holder, registryAccess);
-
-                    // Remove from enchantment tags when config says disabled
                     boolean discoverable = NorthstarCuriosCompatConfig.discoverable();
-                    boolean tradeable    = NorthstarCuriosCompatConfig.tradeable();
+                    boolean tradeable = NorthstarCuriosCompatConfig.tradeable();
                     if (!discoverable || !tradeable) {
                         Set<TagKey<Enchantment>> tags = holder.tags()
                                 .collect(Collectors.toCollection(HashSet::new));
                         boolean changed = false;
                         if (!discoverable) changed |= tags.remove(IN_ENCHANTING_TABLE);
-                        if (!tradeable)    changed |= tags.remove(TRADEABLE);
-                        if (changed) bindTags(holder, tags);
+                        if (!tradeable) changed |= tags.remove(TRADEABLE);
+                        if (changed) bindTags(holder, tags, "Space Walk enchantment");
                     }
                 })
         );
     }
 
-    // -------------------------------------------------------------------------
-    // Enchantment definition patching
-    // -------------------------------------------------------------------------
-
-    private static void updateEnchantmentDefinition(Holder.Reference<Enchantment> holder,
-                                                     RegistryAccess registryAccess) {
-        List<? extends String> slotNames = NorthstarCuriosCompatConfig.COMMON.allowedSlots.get();
-
-        // Collect items from each allowed slot's enchantable tag (dedup via LinkedHashSet)
-        Set<Holder<Item>> allowedItemSet = new LinkedHashSet<>();
+    private static void updateSupportedItemTag(RegistryAccess registryAccess) {
         registryAccess.lookup(NullSafety.nonNull(Registries.ITEM)).ifPresent(itemLookup -> {
-            for (String slotName : slotNames) {
-                TagKey<Item> tag = SLOT_TO_ENCHANTABLE_TAG.get(slotName.toLowerCase(Locale.ROOT));
-                if (tag != null) {
-                    itemLookup.get(tag).ifPresent(hs -> hs.forEach(allowedItemSet::add));
+            Set<TagKey<Item>> allowedSlotTags = configuredSlotTags();
+            List<Holder<Item>> supportedItems = new ArrayList<>();
+
+            itemLookup.listElements().forEach(holder -> {
+                boolean supported = allowedSlotTags.stream().anyMatch(holder::is);
+                Set<TagKey<Item>> tags = holder.tags().collect(Collectors.toCollection(HashSet::new));
+                boolean changed = tags.remove(SPACE_WALK_SUPPORTED_ITEMS);
+
+                if (supported) {
+                    supportedItems.add(holder);
+                    changed |= tags.add(SPACE_WALK_SUPPORTED_ITEMS);
                 }
-            }
+
+                if (changed) {
+                    bindTags(holder, tags, "Space Walk supported item");
+                }
+            });
+
+            itemLookup.listTags()
+                    .filter(tag -> SPACE_WALK_SUPPORTED_ITEMS.equals(tag.key()))
+                    .findFirst()
+                    .ifPresent(tag -> bindNamedTag(tag, supportedItems));
         });
-
-        if (allowedItemSet.isEmpty()) {
-            LOGGER.warn("[NorthstarCuriosCompat] allowedSlots yields no items — skipping supportedItems patch.");
-            return;
-        }
-
-        HolderSet<Item> newSupportedItems = HolderSet.direct(new ArrayList<>(allowedItemSet));
-        List<EquipmentSlot> newSlots = Arrays.asList(NorthstarCuriosCompatConfig.allowedEquipmentSlots());
-
-        // primaryItems: Optional.empty() when discoverable (falls back to supportedItems),
-        // Optional.of(emptySet) when not discoverable (nothing triggers table offer).
-        boolean discoverable = NorthstarCuriosCompatConfig.discoverable();
-        Optional<?> newPrimaryItems = discoverable
-                ? Optional.empty()
-                : Optional.of(NullSafety.nonNull(HolderSet.<Item>empty()));
-
-        Enchantment enchantment = holder.value();
-
-        // In MC 1.21.1 the definition data may live inside a nested "definition" field,
-        // or directly as fields on Enchantment itself — try both.
-        Object defTarget = enchantment;
-        Field defField = findField(Enchantment.class, "definition");
-        if (defField != null) {
-            try {
-                defField.setAccessible(true);
-                Object def = defField.get(enchantment);
-                if (def != null) defTarget = def;
-            } catch (ReflectiveOperationException ignored) {}
-        }
-
-        setFieldReflectively(defTarget, "supportedItems", newSupportedItems);
-        setFieldReflectively(defTarget, "slots", newSlots);
-        setFieldReflectively(defTarget, "primaryItems", newPrimaryItems);
     }
 
-    private static void setFieldReflectively(Object target, String fieldName, Object value) {
-        Field field = findField(target.getClass(), fieldName);
-        if (field == null) {
-            LOGGER.warn("[NorthstarCuriosCompat] Cannot find field '{}' on {} — patch will not take effect.",
-                    fieldName, target.getClass().getName());
-            return;
-        }
-        try {
-            field.setAccessible(true);
-            field.set(target, value);
-        } catch (ReflectiveOperationException e) {
-            LOGGER.warn("[NorthstarCuriosCompat] Failed to patch Space Walk field '{}': {}", fieldName, e.getMessage());
-        }
-    }
-
-    /** Searches {@code cls} and its superclasses for a field with the given name. */
-    private static Field findField(Class<?> cls, String name) {
-        for (Class<?> c = cls; c != null && c != Object.class; c = c.getSuperclass()) {
-            for (Field f : c.getDeclaredFields()) {
-                if (f.getName().equals(name)) return f;
+    private static Set<TagKey<Item>> configuredSlotTags() {
+        Set<TagKey<Item>> tags = new HashSet<>();
+        for (String slotName : NorthstarCuriosCompatConfig.COMMON.allowedSlots.get()) {
+            TagKey<Item> tag = SLOT_TO_ENCHANTABLE_TAG.get(slotName.toLowerCase(Locale.ROOT));
+            if (tag != null) {
+                tags.add(tag);
             }
         }
-        return null;
+        return tags;
     }
 
     // -------------------------------------------------------------------------
     // Tag binding
     // -------------------------------------------------------------------------
 
-    private static <T> void bindTags(Holder<T> holder, Collection<TagKey<T>> tags) {
+    private static <T> void bindTags(Holder<T> holder, Collection<TagKey<T>> tags, String context) {
         try {
             Method method = holder.getClass().getMethod("bindTags", Collection.class);
             method.invoke(holder, tags);
@@ -184,14 +136,30 @@ public final class SpaceWalkEnchantmentTagHandler {
                     method.setAccessible(true);
                     method.invoke(holder, tags);
                 } catch (ReflectiveOperationException ex) {
-                    LOGGER.warn("[NorthstarCuriosCompat] Failed to update Space Walk enchantment tags", ex);
+                    LOGGER.warn("[NorthstarCuriosCompat] Failed to update {} tags", context, ex);
                 }
             } else {
-                LOGGER.warn("[NorthstarCuriosCompat] bindTags not found on {}; "
-                        + "discoverable/tradeable config will not take effect.", holder.getClass().getName());
+                LOGGER.warn("[NorthstarCuriosCompat] bindTags not found on {}; {} tag config will not take effect.",
+                        holder.getClass().getName(), context);
             }
         } catch (ReflectiveOperationException e) {
-            LOGGER.warn("[NorthstarCuriosCompat] Failed to update Space Walk enchantment tags", e);
+            LOGGER.warn("[NorthstarCuriosCompat] Failed to update {} tags", context, e);
+        }
+    }
+
+    private static <T> void bindNamedTag(HolderSet.Named<T> tag, List<Holder<T>> contents) {
+        Method method = findBindNamedTag(tag.getClass());
+        if (method == null) {
+            LOGGER.warn("[NorthstarCuriosCompat] bind not found on {}; Space Walk supported item tag contents may be stale.",
+                    tag.getClass().getName());
+            return;
+        }
+
+        try {
+            method.setAccessible(true);
+            method.invoke(tag, contents);
+        } catch (ReflectiveOperationException e) {
+            LOGGER.warn("[NorthstarCuriosCompat] Failed to update Space Walk supported item tag contents", e);
         }
     }
 
@@ -200,6 +168,18 @@ public final class SpaceWalkEnchantmentTagHandler {
             for (Method m : c.getDeclaredMethods()) {
                 if (m.getName().equals("bindTags") && m.getParameterCount() == 1
                         && Collection.class.isAssignableFrom(m.getParameterTypes()[0])) {
+                    return m;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static Method findBindNamedTag(Class<?> cls) {
+        for (Class<?> c = cls; c != null; c = c.getSuperclass()) {
+            for (Method m : c.getDeclaredMethods()) {
+                if (m.getName().equals("bind") && m.getParameterCount() == 1
+                        && List.class.isAssignableFrom(m.getParameterTypes()[0])) {
                     return m;
                 }
             }
