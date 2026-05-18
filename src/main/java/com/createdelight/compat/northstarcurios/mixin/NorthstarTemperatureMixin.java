@@ -23,24 +23,24 @@ public class NorthstarTemperatureMixin {
 
     private static final int REQUIRED_PROTECTION_SCORE = 4;
 
-        private static final TagKey<Item> INSULATING_TAG = NullSafety.northstarItemTag("insulating");
+    private static final TagKey<Item> INSULATING_TAG = NullSafety.northstarItemTag("insulating");
 
-        private static final TagKey<Item> INSULATING_2_TAG = NullSafety.northstarItemTag("insulating_2");
+    private static final TagKey<Item> INSULATING_T2_TAG = NullSafety.northstarItemTag("insulating_t2");
 
-        private static final TagKey<Item> HEAT_RESISTANT_TAG = NullSafety.northstarItemTag("heat_resistant");
+    private static final TagKey<Item> HEAT_RESISTANT_TAG = NullSafety.northstarItemTag("heat_resistant");
 
-        private static final TagKey<Item> HEAT_RESISTANT_2_TAG = NullSafety.northstarItemTag("heat_resistant_2");
+    private static final TagKey<Item> HEAT_RESISTANT_T2_TAG = NullSafety.northstarItemTag("heat_resistant_t2");
 
     @Inject(method = "hasInsulation", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$hasInsulation(LivingEntity entity, CallbackInfoReturnable<Boolean> cir) {
-        if (countProtectionScore(entity, INSULATING_TAG, INSULATING_2_TAG) >= REQUIRED_PROTECTION_SCORE) {
+        if (countProtectionScore(entity, INSULATING_TAG, INSULATING_T2_TAG) >= REQUIRED_PROTECTION_SCORE) {
             cir.setReturnValue(true);
         }
     }
 
     @Inject(method = "hasHeatProtection", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$hasHeatProtection(LivingEntity entity, CallbackInfoReturnable<Boolean> cir) {
-        if (countProtectionScore(entity, HEAT_RESISTANT_TAG, HEAT_RESISTANT_2_TAG) >= REQUIRED_PROTECTION_SCORE) {
+        if (countProtectionScore(entity, HEAT_RESISTANT_TAG, HEAT_RESISTANT_T2_TAG) >= REQUIRED_PROTECTION_SCORE) {
             cir.setReturnValue(true);
         }
     }

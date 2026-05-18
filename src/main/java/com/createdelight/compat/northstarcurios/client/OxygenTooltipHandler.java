@@ -21,13 +21,13 @@ public class OxygenTooltipHandler {
 
     private static final NumberFormat OXYGEN_NUMBER_FORMAT = NumberFormat.getIntegerInstance(Locale.US);
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_T2 = NullSafety.northstarItemTag("oxygen_sources_t2");
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
 
-        if (stack.isEmpty() || !stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+        if (stack.isEmpty() || !stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2))) {
             return;
         }
 

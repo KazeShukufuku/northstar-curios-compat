@@ -27,10 +27,10 @@ public class NorthstarOxygenMixin {
 
     private static final TagKey<Item> OXYGEN_SOURCE_TAG = NullSafety.northstarItemTag("oxygen_sources");
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_T2 = NullSafety.northstarItemTag("oxygen_sources_t2");
 
     private static boolean isAnyOxygenSource(ItemStack stack) {
-        return stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG)) || stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2));
+        return stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG)) || stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2));
     }
 
     private static ItemStack resolveLiveCuriosStack(ICuriosItemHandler inventory, SlotResult slotResult) {
@@ -184,7 +184,7 @@ public class NorthstarOxygenMixin {
     @Inject(method = "depleteOxygen", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$expandOxygenCapacity(ItemStack stack, boolean consume, CallbackInfoReturnable<Boolean> cir) {
         // Only intercept expanded-capacity items; let the original method handle regular tanks.
-        if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+        if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2))) {
             return;
         }
 

@@ -23,7 +23,7 @@ public class OxygenFillerBlockEntityMixin {
     private static final int DEFAULT_OXYGEN_CAPACITY = 1800;
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
-        private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_T2 = NullSafety.northstarItemTag("oxygen_sources_t2");
 
     private static Container getContainer(Object self) {
         try {
@@ -35,10 +35,10 @@ public class OxygenFillerBlockEntityMixin {
     }
 
     @Inject(method = "getContainedItem", at = @At("HEAD"), cancellable = true, remap = false)
-    private void northstarCuriosCompat$acceptSecondOxygenSourceTag(CallbackInfoReturnable<ItemStack> cir) {
+    private void northstarCuriosCompat$acceptT2OxygenSourceTag(CallbackInfoReturnable<ItemStack> cir) {
         ItemStack stack = getContainer(this).getItem(0);
 
-        if (!stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+        if (!stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2))) {
             cir.setReturnValue(stack);
         }
     }
@@ -51,8 +51,8 @@ public class OxygenFillerBlockEntityMixin {
             ),
             remap = false
     )
-    private boolean northstarCuriosCompat$acceptSecondTagInTooltip(NorthstarTags.NorthstarItemTags tag, ItemStack stack) {
-        return tag.matches(stack) || stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2));
+    private boolean northstarCuriosCompat$acceptT2TagInTooltip(NorthstarTags.NorthstarItemTags tag, ItemStack stack) {
+        return tag.matches(stack) || stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2));
     }
 
     @ModifyConstant(
@@ -63,7 +63,7 @@ public class OxygenFillerBlockEntityMixin {
     private double northstarCuriosCompat$dynamicOxygenTooltipCapacity(double original) {
         ItemStack stack = getContainer(this).getItem(0);
 
-        if (!stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+        if (!stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2))) {
             return EXPANDED_OXYGEN_CAPACITY;
         }
 

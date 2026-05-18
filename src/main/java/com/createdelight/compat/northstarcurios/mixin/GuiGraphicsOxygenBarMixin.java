@@ -19,15 +19,15 @@ public class GuiGraphicsOxygenBarMixin {
     private static final int OXYGEN_BAR_BACKGROUND_COLOR = -16777216;
     private static final int OXYGEN_BAR_FOREGROUND_COLOR = -11691782;
 
-    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_T2 = NullSafety.northstarItemTag("oxygen_sources_t2");
 
     @Inject(
             method = "renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V",
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"),
             remap = false
     )
-    private void northstarCuriosCompat$renderTag2OxygenBar(Font font, ItemStack stack, int x, int y, String text, CallbackInfo ci) {
-        if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+    private void northstarCuriosCompat$renderT2OxygenBar(Font font, ItemStack stack, int x, int y, String text, CallbackInfo ci) {
+        if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2))) {
             return;
         }
 
