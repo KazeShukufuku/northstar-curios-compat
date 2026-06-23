@@ -34,10 +34,6 @@ public class SpaceWalkGravityMixin {
             return;
         }
 
-        if (NorthstarDimensionCompat.isOrbit(entity.level())) {
-            return;
-        }
-
         double gravMultiplier = NorthstarDimensionCompat.gravityScale(entity.level());
         if (gravMultiplier >= 0.999D) {
             return;

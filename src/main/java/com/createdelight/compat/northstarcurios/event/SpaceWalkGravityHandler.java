@@ -40,11 +40,6 @@ public final class SpaceWalkGravityHandler {
             return;
         }
 
-        if (NorthstarDimensionCompat.isOrbit(player.level())) {
-            clearDurabilityProgress(player);
-            return;
-        }
-
         double gravMultiplier = NorthstarDimensionCompat.gravityScale(player.level());
         if (gravMultiplier >= 0.999D) {
             clearDurabilityProgress(player);

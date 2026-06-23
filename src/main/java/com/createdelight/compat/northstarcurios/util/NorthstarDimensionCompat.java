@@ -10,10 +10,6 @@ public final class NorthstarDimensionCompat {
     private NorthstarDimensionCompat() {
     }
 
-    public static boolean isOrbit(Level level) {
-        return ((NorthstarLevel) level).northstar$dimension().isOrbit();
-    }
-
     public static double gravityScale(Level level) {
         return ((NorthstarLevel) level).northstar$gravityScale();
     }

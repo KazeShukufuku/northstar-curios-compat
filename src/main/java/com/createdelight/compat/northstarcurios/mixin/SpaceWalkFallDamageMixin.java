@@ -32,11 +32,8 @@ public class SpaceWalkFallDamageMixin {
             return;
         }
 
-        // Only act in alien dimensions with reduced gravity (skip orbit and earth)
+        // Only act in alien dimensions with reduced gravity.
         if (NorthstarDimensionCompat.hasNormalGravity(entity.level())) {
-            return;
-        }
-        if (NorthstarDimensionCompat.isOrbit(entity.level())) {
             return;
         }
 

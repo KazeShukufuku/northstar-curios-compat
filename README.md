@@ -50,4 +50,4 @@ Required at runtime:
 - Relations:
   - Northstar: Required Dependency
   - Curios API: Required Dependency
-- Upload file: `northstar-curios-compat-1.0.3.jar`
+- Upload file: `northstar-curios-compat-1.3.0.jar`
