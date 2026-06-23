@@ -21,7 +21,7 @@ public class OxygenFillerFluidHandlerMixin {
 
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
-        private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
+    private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
     private ItemStack getContainedItem(Object self) {
         try {
@@ -84,7 +84,7 @@ public class OxygenFillerFluidHandlerMixin {
             return;
         }
 
-        if (!NorthstarOxygen.isOxygen(resource.getFluid())) {
+        if (!NorthstarOxygen.isBreathable(resource.getFluid())) {
             cir.setReturnValue(0);
             return;
         }

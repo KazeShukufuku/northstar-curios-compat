@@ -186,6 +186,13 @@ public class NorthstarOxygenMixin {
         }
     }
 
+    @Inject(method = "getTankCapacity", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void northstarCuriosCompat$expandTankCapacity(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+        if (stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+            cir.setReturnValue(EXPANDED_OXYGEN_CAPACITY);
+        }
+    }
+
     @Inject(method = "depleteOxygen", at = @At("HEAD"), cancellable = true, remap = false)
     private static void northstarCuriosCompat$expandOxygenCapacity(ItemStack stack, boolean consume, CallbackInfoReturnable<Boolean> cir) {
         CompoundTag tag = stack.getTag();

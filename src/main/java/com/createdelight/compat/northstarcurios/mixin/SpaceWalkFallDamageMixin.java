@@ -2,7 +2,7 @@ package com.createdelight.compat.northstarcurios.mixin;
 
 import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatEnchantments;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
-import com.lightning.northstar.world.dimension.NorthstarPlanets;
+import com.createdelight.compat.northstarcurios.util.NorthstarDimensionCompat;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -33,10 +33,10 @@ public class SpaceWalkFallDamageMixin {
         }
 
         // Only act in alien dimensions with reduced gravity (skip orbit and earth)
-        if (NorthstarPlanets.hasNormalGrav(entity.level().dimension())) {
+        if (NorthstarDimensionCompat.hasNormalGravity(entity.level())) {
             return;
         }
-        if (NorthstarPlanets.isInOrbit(entity.level().dimension())) {
+        if (NorthstarDimensionCompat.isOrbit(entity.level())) {
             return;
         }
 

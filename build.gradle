@@ -19,6 +19,8 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
+            property("mixin.env.remapRefMap", "true")
+            property("mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg")
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -27,6 +29,8 @@ minecraft {
         }
         server {
             workingDirectory project.file('run')
+            property("mixin.env.remapRefMap", "true")
+            property("mixin.env.refMapRemappingFile", "${projectDir}/build/createSrgToMcp/output.srg")
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -39,10 +43,26 @@ minecraft {
 repositories {
     mavenCentral()
     maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    maven { url = 'https://maven.createmod.net' }
+    maven { url = 'https://maven.ithundxr.dev/mirror' }
+    maven { url = 'https://raw.githubusercontent.com/Fuzss/modresources/main/maven/' }
+    maven {
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content {
+            includeGroupByRegex 'software\\.bernie.*'
+            includeGroup 'com.eliotlash.mclib'
+        }
+    }
     maven {
         url = 'https://cursemaven.com'
         content {
             includeGroup 'curse.maven'
+        }
+    }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
         }
     }
 }
@@ -50,8 +70,16 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly fg.deobf("curse.maven:northstar-redux-${northstar_redux_cf}")
-    compileOnly fg.deobf("curse.maven:curios-${curios_cf}")
+    implementation fg.deobf("maven.modrinth:northstar-redux:${northstar_redux_version}")
+    implementation fg.deobf("curse.maven:curios-${curios_cf}")
+    implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
+    implementation fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
+    compileOnly fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
+    runtimeOnly fg.deobf("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
+    implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    implementation "io.github.llamalad7:mixinextras-forge:0.4.1"
+    runtimeOnly fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:${geckolib_version}")
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
