@@ -20,7 +20,11 @@ public class RemainingOxygenOverlayMixin {
 
     @Redirect(
             method = "render",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;m_128451_(Ljava/lang/String;)I"),
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/nbt/CompoundTag;getInt(Ljava/lang/String;)I",
+                    remap = true
+            ),
             remap = false
     )
     private int northstarCuriosCompat$stabilizeArmorOverlayOxygen(CompoundTag tag, String key) {
