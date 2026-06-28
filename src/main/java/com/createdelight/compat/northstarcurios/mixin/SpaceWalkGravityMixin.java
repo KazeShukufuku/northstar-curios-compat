@@ -3,7 +3,7 @@ package com.createdelight.compat.northstarcurios.mixin;
 import com.createdelight.compat.northstarcurios.config.NorthstarCuriosCompatConfig;
 import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatEnchantments;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
-import com.lightning.northstar.world.dimension.NorthstarPlanets;
+import com.lightning.northstar.accessor.NorthstarLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffects;
@@ -33,11 +33,7 @@ public class SpaceWalkGravityMixin {
             return;
         }
 
-        if (NorthstarPlanets.isInOrbit(entity.level().dimension())) {
-            return;
-        }
-
-        double gravMultiplier = NorthstarPlanets.getGravMultiplier(entity.level().dimension());
+        double gravMultiplier = ((NorthstarLevel) entity.level()).northstar$gravityScale();
         if (gravMultiplier >= 0.999D) {
             return;
         }

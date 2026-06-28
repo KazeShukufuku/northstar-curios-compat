@@ -1,6 +1,6 @@
 # Northstar Curios Compat
 
-A small Forge compatibility mod for Minecraft 1.20.1 that allows Northstar oxygen logic to consume oxygen tanks equipped in Curios slots.
+A small NeoForge compatibility mod for Minecraft 1.21.1 that allows Northstar oxygen logic to consume oxygen tanks equipped in Curios slots.
 
 ## License
 
@@ -31,10 +31,10 @@ If you redistribute a modpack that includes those dependencies, follow each proj
 
 Required at runtime:
 
-- Minecraft `1.20.1`
-- Forge `47.4+`
-- Northstar `0.5.4+`
-- Curios `5.14+`
+- Minecraft `1.21.1`
+- NeoForge `21.1.219+`
+- Northstar Redux `0.6.1+`
+- Curios `9.0+`
 
 ## Distribution notes
 
@@ -50,4 +50,4 @@ Required at runtime:
 - Relations:
   - Northstar: Required Dependency
   - Curios API: Required Dependency
-- Upload file: `northstar-curios-compat-1.0.3.jar`
+- Upload file: `northstar-curios-compat-neoforge-1.3.1.jar`

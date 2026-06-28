@@ -3,7 +3,7 @@ package com.createdelight.compat.northstarcurios.mixin;
 import com.createdelight.compat.northstarcurios.config.NorthstarCuriosCompatConfig;
 import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatEnchantments;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
-import com.lightning.northstar.world.dimension.NorthstarPlanets;
+import com.lightning.northstar.accessor.NorthstarLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Mth;
@@ -35,10 +35,7 @@ public class SpaceWalkFallDamageMixin {
             return;
         }
 
-        if (NorthstarPlanets.hasNormalGrav(entity.level().dimension())) {
-            return;
-        }
-        if (NorthstarPlanets.isInOrbit(entity.level().dimension())) {
+        if (((NorthstarLevel) entity.level()).northstar$gravityScale() >= 0.999D) {
             return;
         }
 

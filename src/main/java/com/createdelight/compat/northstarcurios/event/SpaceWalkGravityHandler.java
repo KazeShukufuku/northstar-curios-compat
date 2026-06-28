@@ -4,7 +4,7 @@ import com.createdelight.compat.northstarcurios.NorthstarCuriosCompatMod;
 import com.createdelight.compat.northstarcurios.config.NorthstarCuriosCompatConfig;
 import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatEnchantments;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
-import com.lightning.northstar.world.dimension.NorthstarPlanets;
+import com.lightning.northstar.accessor.NorthstarLevel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -39,12 +39,7 @@ public final class SpaceWalkGravityHandler {
             return;
         }
 
-        if (NorthstarPlanets.isInOrbit(player.level().dimension())) {
-            clearDurabilityProgress(player);
-            return;
-        }
-
-        double gravMultiplier = NorthstarPlanets.getGravMultiplier(player.level().dimension());
+        double gravMultiplier = ((NorthstarLevel) player.level()).northstar$gravityScale();
         if (gravMultiplier >= 0.999D) {
             clearDurabilityProgress(player);
             return;

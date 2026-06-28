@@ -68,7 +68,7 @@ public class NorthstarOxygenMixin {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
 
             if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)
-                    && canProvideOxygenWithoutConsuming(liveStack)) {
+                    && canProvideOxygenWithoutConsuming(entity.level(), liveStack)) {
                 return liveStack;
             }
         }
@@ -76,9 +76,9 @@ public class NorthstarOxygenMixin {
         return ItemStack.EMPTY;
     }
 
-    private static boolean canProvideOxygenWithoutConsuming(ItemStack stack) {
+    private static boolean canProvideOxygenWithoutConsuming(Level level, ItemStack stack) {
         ItemStack probeStack = stack.copy();
-        return NorthstarOxygen.depleteOxygen(probeStack, false);
+        return NorthstarOxygen.depleteOxygen(level, probeStack, false);
     }
 
     private static boolean hasUsableCuriosOxygenTank(LivingEntity entity) {
@@ -94,7 +94,7 @@ public class NorthstarOxygenMixin {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
 
             if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)
-                    && canProvideOxygenWithoutConsuming(liveStack)) {
+                    && canProvideOxygenWithoutConsuming(entity.level(), liveStack)) {
                 return true;
             }
         }
@@ -115,7 +115,7 @@ public class NorthstarOxygenMixin {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
 
             if (!liveStack.isEmpty() && isAnyOxygenSource(liveStack)
-                    && NorthstarOxygen.depleteOxygen(liveStack, shouldConsume)) {
+                    && NorthstarOxygen.depleteOxygen(entity.level(), liveStack, shouldConsume)) {
                 return true;
             }
         }
@@ -130,7 +130,7 @@ public class NorthstarOxygenMixin {
             return false;
         }
 
-        return NorthstarOxygen.depleteOxygen(tank.copy(), false);
+        return NorthstarOxygen.depleteOxygen(entity.level(), tank.copy(), false);
     }
 
     @Inject(method = "onBreathe", at = @At("HEAD"), cancellable = true, remap = false)
@@ -182,7 +182,7 @@ public class NorthstarOxygenMixin {
     }
 
     @Inject(method = "depleteOxygen", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void northstarCuriosCompat$expandOxygenCapacity(ItemStack stack, boolean consume, CallbackInfoReturnable<Boolean> cir) {
+    private static void northstarCuriosCompat$expandOxygenCapacity(Level level, ItemStack stack, boolean consume, CallbackInfoReturnable<Boolean> cir) {
         // Only intercept expanded-capacity items; let the original method handle regular tanks.
         if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2))) {
             return;

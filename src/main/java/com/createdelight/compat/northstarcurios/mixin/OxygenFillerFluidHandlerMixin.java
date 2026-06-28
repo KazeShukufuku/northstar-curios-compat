@@ -86,7 +86,7 @@ public class OxygenFillerFluidHandlerMixin {
             return;
         }
 
-        if (!NorthstarOxygen.isOxygen(resource.getFluid())) {
+        if (!NorthstarOxygen.isBreathable(resource.getFluid())) {
             cir.setReturnValue(0);
             return;
         }
