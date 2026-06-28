@@ -3,15 +3,15 @@ package com.createdelight.compat.northstarcurios.mixin;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
 import com.lightning.northstar.block.tech.oxygen_filler.OxygenFillerBlockEntity;
 import com.lightning.northstar.content.NorthstarTags;
+import com.lightning.northstar.world.oxygen.NorthstarOxygen;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 @Mixin(value = OxygenFillerBlockEntity.class, remap = false)
 public class OxygenFillerBlockEntityMixin {
 
-    private static final int DEFAULT_OXYGEN_CAPACITY = 1800;
     private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
     private static final TagKey<Item> OXYGEN_SOURCE_TAG_T2 = NullSafety.northstarItemTag("oxygen_sources_t2");
@@ -55,18 +54,19 @@ public class OxygenFillerBlockEntityMixin {
         return tag.matches(stack) || stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2));
     }
 
-    @ModifyConstant(
+    @Redirect(
             method = "addToGoggleTooltip",
-            constant = @Constant(doubleValue = 1800.0D),
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lcom/lightning/northstar/world/oxygen/NorthstarOxygen;getTankCapacity(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;)I"
+            ),
             remap = false
     )
-    private double northstarCuriosCompat$dynamicOxygenTooltipCapacity(double original) {
-        ItemStack stack = getContainer(this).getItem(0);
-
+    private int northstarCuriosCompat$dynamicOxygenTooltipCapacity(Level level, ItemStack stack) {
         if (!stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_T2))) {
             return EXPANDED_OXYGEN_CAPACITY;
         }
 
-        return DEFAULT_OXYGEN_CAPACITY;
+        return NorthstarOxygen.getTankCapacity(level, stack);
     }
 }
