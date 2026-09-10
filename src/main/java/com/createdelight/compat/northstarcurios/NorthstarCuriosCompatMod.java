@@ -2,6 +2,7 @@ package com.createdelight.compat.northstarcurios;
 
 import com.createdelight.compat.northstarcurios.config.NorthstarCuriosCompatConfig;
 import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatEnchantments;
+import com.createdelight.compat.northstarcurios.registry.NorthstarCuriosCompatItems;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -15,6 +16,7 @@ public class NorthstarCuriosCompatMod {
     public NorthstarCuriosCompatMod() {
         var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         NorthstarCuriosCompatEnchantments.ENCHANTMENTS.register(modEventBus);
+        NorthstarCuriosCompatItems.ITEMS.register(modEventBus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, NorthstarCuriosCompatConfig.SPEC);
     }
 }

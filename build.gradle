@@ -72,6 +72,8 @@ dependencies {
 
     implementation fg.deobf("maven.modrinth:northstar-redux:${northstar_redux_version}")
     implementation fg.deobf("curse.maven:curios-${curios_cf}")
+    compileOnly fg.deobf("curse.maven:kubejs-238086:5853326")
+    compileOnly fg.deobf("curse.maven:rhino-416294:6186971")
     implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
     implementation fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
     compileOnly fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}")
@@ -98,12 +100,25 @@ tasks.withType(JavaCompile).configureEach {
     ]
 }
 
+def generatedMixinRefmap = layout.buildDirectory.file('generated/mixin/northstar_curios_compat.refmap.json')
+
+tasks.named('compileJava', JavaCompile).configure {
+    outputs.file(generatedMixinRefmap)
+    doFirst {
+        def refmapFile = generatedMixinRefmap.get().asFile
+        refmapFile.parentFile.mkdirs()
+        options.compilerArgs.removeAll { it.startsWith('-AoutRefMapFile=') }
+        options.compilerArgs.add("-AoutRefMapFile=${refmapFile.absolutePath}")
+    }
+}
+
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
 
 jar {
+    from(generatedMixinRefmap)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
@@ -115,4 +130,38 @@ jar {
             'MixinConfigs': 'northstar_curios_compat.mixins.json'
         )
     }
+}
+
+tasks.register('verifyMixinRefmap') {
+    group = 'verification'
+    description = 'Verifies that the release jar contains the remapped oxygen injection targets.'
+    dependsOn tasks.named('jar')
+    doLast {
+        def archiveFile = tasks.named('jar', Jar).get().archiveFile.get().asFile
+        new java.util.jar.JarFile(archiveFile).withCloseable { archive ->
+            def entry = archive.getJarEntry('northstar_curios_compat.refmap.json')
+            if (entry == null) {
+                throw new GradleException('Release jar is missing the Mixin refmap.')
+            }
+            def refmap = archive.getInputStream(entry).withCloseable { stream ->
+                new groovy.json.JsonSlurper().parse(stream)
+            }
+            def targets = [
+                'renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V',
+                'Lnet/minecraft/world/item/ItemStack;isEmpty()Z'
+            ]
+            targets.each { target ->
+                def mapped = refmap.mappings?.values()?.any { mappings ->
+                    mappings[target] instanceof String && mappings[target].contains('m_')
+                }
+                if (!mapped) {
+                    throw new GradleException("Mixin refmap is missing the SRG mapping for ${target}.")
+                }
+            }
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn tasks.named('verifyMixinRefmap')
 }

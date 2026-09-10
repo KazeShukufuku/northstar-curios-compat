@@ -1,6 +1,7 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
 import com.createdelight.compat.northstarcurios.util.NullSafety;
+import com.createdelight.compat.northstarcurios.api.EquipmentChecks;
 import com.lightning.northstar.world.oxygen.NorthstarOxygen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
@@ -18,8 +19,6 @@ import java.lang.reflect.Method;
 
 @Mixin(targets = "com.lightning.northstar.block.tech.oxygen_filler.OxygenFillerBlockEntity$1", remap = false)
 public class OxygenFillerFluidHandlerMixin {
-
-    private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
 
     private static final TagKey<Item> OXYGEN_SOURCE_TAG_2 = NullSafety.northstarItemTag("oxygen_sources_2");
 
@@ -56,7 +55,8 @@ public class OxygenFillerFluidHandlerMixin {
     }
 
     private static boolean isExpandedTank(ItemStack stack) {
-        return !stack.isEmpty() && stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2));
+        return !stack.isEmpty() && (stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))
+                || (!EquipmentChecks.isTaggedOxygenSource(stack) && EquipmentChecks.customOxygenCapacity(stack) > 0));
     }
 
     @Inject(method = "getTankCapacity", at = @At("HEAD"), cancellable = true, remap = false)
@@ -68,7 +68,7 @@ public class OxygenFillerFluidHandlerMixin {
         ItemStack stack = getContainedItem(this);
 
         if (isExpandedTank(stack)) {
-            cir.setReturnValue(EXPANDED_OXYGEN_CAPACITY);
+            cir.setReturnValue(NorthstarOxygen.getTankCapacity(stack));
         }
     }
 
@@ -89,12 +89,12 @@ public class OxygenFillerFluidHandlerMixin {
             return;
         }
 
-        CompoundTag tag = stack.getOrCreateTag();
-        int oxygen = tag.getInt("Oxygen");
-        int fillAmount = Mth.clamp(EXPANDED_OXYGEN_CAPACITY - oxygen, 0, resource.getAmount());
+        CompoundTag tag = stack.getTag();
+        int oxygen = tag == null ? 0 : Math.max(0, tag.getInt("Oxygen"));
+        int fillAmount = Mth.clamp(NorthstarOxygen.getTankCapacity(stack) - oxygen, 0, resource.getAmount());
 
         if (action.execute() && fillAmount > 0) {
-            tag.putInt("Oxygen", oxygen + fillAmount);
+            stack.getOrCreateTag().putInt("Oxygen", oxygen + fillAmount);
             sendData(this);
         }
 

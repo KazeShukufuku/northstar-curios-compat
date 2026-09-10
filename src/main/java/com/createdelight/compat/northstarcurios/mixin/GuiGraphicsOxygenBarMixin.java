@@ -1,6 +1,8 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
 import com.createdelight.compat.northstarcurios.util.NullSafety;
+import com.createdelight.compat.northstarcurios.api.EquipmentChecks;
+import com.lightning.northstar.world.oxygen.NorthstarOxygen;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
@@ -16,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = GuiGraphics.class)
 public class GuiGraphicsOxygenBarMixin {
 
-    private static final int EXPANDED_OXYGEN_CAPACITY = 3600;
     private static final int OXYGEN_BAR_BACKGROUND_COLOR = -16777216;
     private static final int OXYGEN_BAR_FOREGROUND_COLOR = -11691782;
 
@@ -27,13 +28,14 @@ public class GuiGraphicsOxygenBarMixin {
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V")
     )
     private void northstarCuriosCompat$renderTag2OxygenBar(Font font, ItemStack stack, int x, int y, String text, CallbackInfo ci) {
-        if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+        if (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))
+                && (EquipmentChecks.isTaggedOxygenSource(stack) || EquipmentChecks.customOxygenCapacity(stack) <= 0)) {
             return;
         }
 
-        CompoundTag tag = stack.getOrCreateTag();
-        int oxygen = Math.max(0, tag.getInt("Oxygen"));
-        float filled = oxygen / (float) EXPANDED_OXYGEN_CAPACITY;
+        CompoundTag tag = stack.getTag();
+        int oxygen = tag == null ? 0 : Math.max(0, tag.getInt("Oxygen"));
+        float filled = Math.min(1.0F, (float) oxygen / Math.max(1, NorthstarOxygen.getTankCapacity(stack)));
         int barWidth = (int) (13.0F * filled);
 
         GuiGraphics guiGraphics = (GuiGraphics) (Object) this;

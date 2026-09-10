@@ -1,0 +1,8 @@
+{
+  "item.ncc.oxygen_tank": "Oxygen Tank",
+  "item.ncc.oxygen_tank.oxygen": "Equip in a Curios slot to supply oxygen",
+  "item.ncc.oxygen_tank.protection": "Provides a little insulation",
+  "item.ncc.sturdy_oxygen_tank": "Sturdy Oxygen Tank",
+  "item.ncc.sturdy_oxygen_tank.oxygen": "Equip in a Curios slot to supply more oxygen",
+  "item.ncc.sturdy_oxygen_tank.protection": "Provides improved insulation and heat resistance"
+}
