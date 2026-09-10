@@ -36,6 +36,62 @@ Required at runtime:
 - Northstar `0.5.4+`
 - Curios `5.14+`
 
+## Oxygen tank items
+
+The addon registers these items under the `ncc` namespace without requiring KubeJS.
+The mod ID, existing enchantment IDs and event group remain unchanged:
+
+| Item ID | Name | Oxygen tag | Insulation | Heat resistance |
+| --- | --- | --- | --- | --- |
+| `ncc:oxygen_tank` | Oxygen Tank | `northstar:oxygen_sources` | 1 point | None |
+| `ncc:sturdy_oxygen_tank` | Sturdy Oxygen Tank | `northstar:oxygen_sources_2` | 2 points | 2 points |
+
+Both are unstackable, appear in Northstar's creative item tab, and accept Curios
+`back` and `body` slots when those slots are available. Both have `northstar:oxygen_sealing`
+and `northstar:full_seal`. They start empty and use the existing tagged-tank charging,
+capacity and oxygen consumption behavior. Full-body sealing does not increase their
+temperature protection scores; the normal four-point threshold still applies.
+
+The item definitions, textures and Chinese tooltips were migrated from the CDR-NGH
+KubeJS definitions for `createdelight:oxygen_tank` and `createdelight:sturdy_oxygen_tank`.
+No crafting recipes are included. The original modpack scripts have not been edited;
+old item IDs and existing stacks are not automatically remapped. Pack authors should
+remove the old KubeJS item registrations when completing the migration and update
+their recipe/item references separately to the new IDs.
+
+## KubeJS equipment checks
+
+With KubeJS 6.x for Minecraft 1.20.1 installed, register equipment rules using
+`NorthstarCuriosEvents.equipmentCheck` in `kubejs/startup_scripts/`.
+`NorthstarEvents` belongs to Northstar itself; it does not expose this addon's equipment event.
+Scripts written against the previous name must change to `NorthstarCuriosEvents`.
+
+The [golden helmet example](examples/kubejs/startup_scripts/golden_helmet_protection.js)
+grants a 4000 mB oxygen capacity, full-body sealing, and four points each of
+insulation and heat resistance. Copy it to the instance's startup scripts on both
+client and server, then fully restart them. The helmet must still be filled with
+oxygen. Full-body sealing replaces the four armor-slot sealing checks, not the oxygen supply.
+Existing `northstar:oxygen_sources` and `northstar:oxygen_sources_2` tags take
+precedence over custom capacity rules; do not add those tags to the example helmet.
+
+### Full-body sealing
+
+The item tag `northstar:full_seal` or an `equipmentCheck` event with type `full_seal`
+and `event.grant(1)` provides full-body sealing while the item is equipped in an
+armor slot or a functional Curios slot. Empty armor slots are allowed in this case.
+The callback receives the wearer and a slot such as `head` or `curios:necklace:0`.
+Inventory items, held items and cosmetic Curios slots do not provide full-body sealing.
+
+Without a full-body sealing item, both armor and Curios oxygen supplies require
+all four armor slots to be occupied and each to pass the `northstar:oxygen_sealing`
+tag or the existing `oxygen_sealing` event check. Curios oxygen tanks no longer
+bypass this requirement. A regular `oxygen_sealing` item in Curios does not replace
+an armor slot. Existing Curios-only setups must add full-body sealing or equip a sealed suit.
+
+Full-body sealing does not grant oxygen, insulation or heat resistance. A separate
+equipped oxygen supply is still required and depleted normally. Both of this addon's
+oxygen tank items are included in `northstar:full_seal` by default.
+
 ## Distribution notes
 
 - This repository contains only compatibility code for this addon.

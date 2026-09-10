@@ -1,6 +1,7 @@
 package com.createdelight.compat.northstarcurios.mixin;
 
 import com.createdelight.compat.northstarcurios.util.NullSafety;
+import com.createdelight.compat.northstarcurios.api.EquipmentChecks;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,10 +49,11 @@ public class NorthstarTemperatureMixin {
     private static int countProtectionScore(LivingEntity entity, TagKey<Item> baseTag, TagKey<Item> advancedTag) {
         int score = 0;
 
-        score += getProtectionValue(entity.getItemBySlot(EquipmentSlot.HEAD), baseTag, advancedTag);
-        score += getProtectionValue(entity.getItemBySlot(EquipmentSlot.CHEST), baseTag, advancedTag);
-        score += getProtectionValue(entity.getItemBySlot(EquipmentSlot.LEGS), baseTag, advancedTag);
-        score += getProtectionValue(entity.getItemBySlot(EquipmentSlot.FEET), baseTag, advancedTag);
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() == EquipmentSlot.Type.ARMOR) {
+                score += getProtectionValue(entity.getItemBySlot(slot), baseTag, advancedTag, entity, slot.getName());
+            }
+        }
 
         var inventoryOptional = CuriosApi.getCuriosInventory(entity).resolve();
         if (inventoryOptional.isEmpty()) {
@@ -59,24 +61,28 @@ public class NorthstarTemperatureMixin {
         }
 
         ICuriosItemHandler inventory = inventoryOptional.get();
-        for (SlotResult slotResult : inventory.findCurios(stack -> stack.is(NullSafety.nonNull(baseTag)) || stack.is(NullSafety.nonNull(advancedTag)))) {
+        for (SlotResult slotResult : inventory.findCurios(stack -> !stack.isEmpty())) {
             ItemStack liveStack = resolveLiveCuriosStack(inventory, slotResult);
             if (!liveStack.isEmpty()) {
-                score += getProtectionValue(liveStack, baseTag, advancedTag);
+                String slot = "curios:" + slotResult.slotContext().identifier() + ":" + slotResult.slotContext().index();
+                score += getProtectionValue(liveStack, baseTag, advancedTag, entity, slot);
             }
         }
 
         return score;
     }
 
-    private static int getProtectionValue(ItemStack stack, TagKey<Item> baseTag, TagKey<Item> advancedTag) {
+    private static int getProtectionValue(ItemStack stack, TagKey<Item> baseTag, TagKey<Item> advancedTag,
+                                          LivingEntity entity, String slot) {
+        String type = baseTag.equals(INSULATING_TAG) ? "insulation" : "heat_resistance";
+        int custom = EquipmentChecks.query(type, stack, entity, slot);
         if (stack.is(NullSafety.nonNull(advancedTag))) {
-            return 2;
+            return Math.max(2, custom);
         }
         if (stack.is(NullSafety.nonNull(baseTag))) {
-            return 1;
+            return Math.max(1, custom);
         }
-        return 0;
+        return custom;
     }
 
     private static ItemStack resolveLiveCuriosStack(ICuriosItemHandler inventory, SlotResult slotResult) {

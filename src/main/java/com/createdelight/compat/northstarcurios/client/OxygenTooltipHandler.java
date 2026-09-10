@@ -2,6 +2,7 @@ package com.createdelight.compat.northstarcurios.client;
 
 import com.createdelight.compat.northstarcurios.NorthstarCuriosCompatMod;
 import com.createdelight.compat.northstarcurios.util.NullSafety;
+import com.createdelight.compat.northstarcurios.api.EquipmentChecks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
@@ -28,7 +29,8 @@ public class OxygenTooltipHandler {
     public static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
 
-        if (stack.isEmpty() || !stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))) {
+        if (stack.isEmpty() || (!stack.is(NullSafety.nonNull(OXYGEN_SOURCE_TAG_2))
+                && (EquipmentChecks.isTaggedOxygenSource(stack) || EquipmentChecks.customOxygenCapacity(stack) <= 0))) {
             return;
         }
 

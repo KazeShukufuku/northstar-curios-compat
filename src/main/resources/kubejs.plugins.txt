@@ -1,0 +1,1 @@
+com.createdelight.compat.northstarcurios.compat.kubejs.NorthstarCompatKubeJSPlugin

@@ -38,3 +38,10 @@ mandatory=true
 versionRange="[5.14,)"
 ordering="AFTER"
 side="BOTH"
+
+[[dependencies.northstar_curios_compat]]
+modId="kubejs"
+mandatory=false
+versionRange="[2001.6.0,2001.7)"
+ordering="AFTER"
+side="BOTH"
